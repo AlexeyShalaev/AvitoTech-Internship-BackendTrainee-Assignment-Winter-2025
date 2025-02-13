@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	DatabaseURL string
+	MigrationsPath string
 }
 
 func Load() *Config {
@@ -18,5 +19,6 @@ func Load() *Config {
 			os.Getenv("POSTGRES_PORT"),
 			os.Getenv("POSTGRES_DB"),
 		),
+		MigrationsPath: os.Getenv("MIGRATIONS_PATH"),
 	}
 }

@@ -18,24 +18,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
-
-func runMigrations(dbURL string) {
-	m, err := migrate.New("file://./migrations", dbURL)
-	if err != nil {
-		log.Fatalf("Migration initialization error: %v", err)
-	}
-
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Migration error: %v", err)
-	}
-
-	log.Println("Migrations applied successfully")
-}
 
 func runGRPCServer(ctx context.Context, userService pb.UserServiceServer) {
 	listener, err := net.Listen("tcp", ":50051")
@@ -75,7 +58,7 @@ func main() {
 	}
 	defer dbPool.Close()
 
-	runMigrations(cfg.DatabaseURL)
+	db.ApplyMigrations(cfg.MigrationsPath, cfg.DatabaseURL)
 
 	userRepo := user.NewRepository(dbPool)
 	userService := user.NewService(userRepo)

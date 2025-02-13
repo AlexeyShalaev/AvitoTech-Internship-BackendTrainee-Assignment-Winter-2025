@@ -16,6 +16,26 @@ services:
       postgres-test:
         condition: service_healthy
 
+  user-service-test:
+    build:
+      context: ./services/user-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-user-service-test
+    environment:
+      MIGRATIONS_PATH: /app/migrations
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: postgres-test
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+    networks:
+      - avito-network-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+
   postgres-test:
     image: postgres:17
     container_name: avito-postgres-test
