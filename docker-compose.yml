@@ -1,0 +1,54 @@
+services:
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:5
+    container_name: avito-auth-service
+    environment:
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+    networks:
+      - avito-network
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/health/check
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  postgres:
+    image: postgres:17
+    container_name: avito-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: on-failure:5
+    networks:
+      - avito-network
+    volumes:
+      - avito-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+   
+networks:
+  avito-network:
+    name: avito-network
+    driver: bridge
+
+volumes:
+  avito-postgres-data:
+    name: avito-postgres-data

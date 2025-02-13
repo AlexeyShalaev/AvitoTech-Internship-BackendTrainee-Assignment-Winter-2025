@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+  rpc CreateIfNotExists(CreateIfNotExistsRequest) returns (CreateIfNotExistsResponse);
+}
+
+message GetUserByIdRequest {
+  string username = 1;
+}
+
+message GetUserByIdResponse {
+  string id = 1;
+  string username = 2;
+  string hashed_password = 3;
+}
+
+message CreateIfNotExistsRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message CreateIfNotExistsResponse {
+  string id = 1;
+  string username = 2;
+  string hashed_password = 3;
+  bool is_new = 4;  // True, если пользователь создан
+}

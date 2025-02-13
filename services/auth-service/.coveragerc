@@ -1,0 +1,6 @@
+[run]
+# Include only source files
+source = src
+
+[report]
+# Omit the servicers directory from coverage

@@ -1,0 +1,38 @@
+services:
+  auth-service-test:
+    build:
+      context: ./services/auth-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-auth-service-test
+    environment:
+      - MODE=testing
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/postgres
+    networks:
+      - avito-network-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+
+  postgres-test:
+    image: postgres:17
+    container_name: avito-postgres-test
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: on-failure:2
+    networks:
+      - avito-network-test
+   
+networks:
+  avito-network-test:
+    name: avito-network-test
+    driver: bridge
