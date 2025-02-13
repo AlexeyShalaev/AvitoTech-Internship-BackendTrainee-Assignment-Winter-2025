@@ -12,6 +12,6 @@ prometheus-fastapi-instrumentator==7.0.*
 
 grpcio==1.67.*
 grpcio-tools==1.67.*
-werkzeug==3.0.*
+bcrypt==4.2.*
 python-jose[cryptography]==3.3.*
 loguru==0.7.*

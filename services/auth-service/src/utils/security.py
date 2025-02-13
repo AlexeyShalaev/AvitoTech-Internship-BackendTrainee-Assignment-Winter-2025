@@ -1,14 +1,17 @@
+import bcrypt
 from jose import jwt
 from src.core.config import settings
-from werkzeug.security import check_password_hash, generate_password_hash
 
 
 def hash_password(password: str) -> str:
-    return generate_password_hash(password)
+    """Хеширует пароль, используя bcrypt."""
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+    return hashed.decode()  # Преобразуем байты в строку для хранения
 
 
 def verify_password(hashed_password: str, password: str) -> bool:
-    return check_password_hash(hashed_password, password)
+    """Проверяет пароль, сравнивая его с хешем."""
+    return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
 def create_access_token(data: dict) -> str:
