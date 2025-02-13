@@ -1,0 +1,1 @@
+# AvitoTech-Internship-BackendTrainee-Assignment-Winter-2025
