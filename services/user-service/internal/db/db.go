@@ -2,29 +2,19 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"os"
 
-	"github.com/jackc/pgx/v4"
+	"user-service/internal/config"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-var Conn *pgx.Conn
-
-func InitDB() {
-	var err error
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_PORT"),
-		os.Getenv("POSTGRES_DB"),
-	)
-
-	Conn, err = pgx.Connect(context.Background(), dsn)
+func InitDB(cfg *config.Config) (*pgxpool.Pool, error) {
+	dbPool, err := pgxpool.Connect(context.Background(), cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		return nil, err
 	}
 
-	fmt.Println("Connected to PostgreSQL")
+	log.Println("Connected to PostgreSQL")
+	return dbPool, nil
 }

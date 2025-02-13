@@ -7,17 +7,17 @@ import (
 	"user-service/internal/services/user"
 )
 
-// Конструктор сервера
-func NewServer() *Server {
-	return &Server{}
-}
-
 type Server struct {
 	pb.UnimplementedUserServiceServer
+	userService *user.Service
+}
+
+func NewServer(userService *user.Service) *Server {
+	return &Server{userService: userService}
 }
 
 func (s *Server) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.GetUserByIdResponse, error) {
-	user, err := user.GetUserById(ctx, req.Id)
+	user, err := s.userService.GetUserById(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (s *Server) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*
 }
 
 func (s *Server) CreateIfNotExists(ctx context.Context, req *pb.CreateIfNotExistsRequest) (*pb.CreateIfNotExistsResponse, error) {
-	user, isNew, err := user.CreateUserIfNotExists(ctx, req.Username, req.Password)
+	user, isNew, err := s.userService.CreateUserIfNotExists(ctx, req.Username, req.Password)
 	if err != nil {
 		return nil, err
 	}
