@@ -7,7 +7,7 @@ from src.core.config import settings
 
 
 class UserServiceClient:
-    def __init__(self, timeout: float = 0.05) -> None:
+    def __init__(self, timeout: float = settings.USER_SERVICE_TIMEOUT) -> None:
         self._timeout: float = timeout
         self._channel = None
         self._stub = None

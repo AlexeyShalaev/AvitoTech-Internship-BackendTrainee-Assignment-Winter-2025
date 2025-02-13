@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRES_IN: int = 2592000
     
     USER_SERVICE_HOST: str = "user-service:50051"
+    USER_SERVICE_TIMEOUT: float = 0.1
 
 
 settings = Settings()
