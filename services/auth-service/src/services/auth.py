@@ -120,14 +120,7 @@ class TokenBasedAuthentication:
             )
             
         async with UserServiceClient() as user_client:
-            user = await user_client.get_by_id(session.user_id)
-            
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=self.ProblemCode.INCORRECT_PROVIDED_DATA,
-                    headers=TokenBasedAuthentication.delete_refresh_token_headers,
-                )
+            user: user_pb2.GetUserByIdResponse = await user_client.get_by_id(str(session.user_id))
             
         # Create Access Token
         session_data: dict = self._create_session_data(user.id, user.username, current_datetime)
