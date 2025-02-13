@@ -9,7 +9,7 @@ services:
     environment:
       - MODE=testing
       - ALEMBIC_CFG=/app/alembic.ini
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/postgres
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/auth_service_db
     networks:
       - avito-network-test
     depends_on:
@@ -29,7 +29,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST: postgres-test
       POSTGRES_PORT: 5432
-      POSTGRES_DB: postgres
+      POSTGRES_DB: user_service_db
     networks:
       - avito-network-test
     depends_on:
@@ -51,6 +51,8 @@ services:
     restart: on-failure:2
     networks:
       - avito-network-test
+    volumes:
+      - ./configs/dev/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql:ro
    
 networks:
   avito-network-test:

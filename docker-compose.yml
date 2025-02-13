@@ -9,7 +9,7 @@ services:
     container_name: avito-auth-service
     environment:
       - ALEMBIC_CFG=/app/alembic.ini
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/auth_service_db
     networks:
       - avito-network
     ports:
@@ -38,7 +38,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DB: postgres
+      POSTGRES_DB: user_service_db
     networks:
       - avito-network
     depends_on:
@@ -68,6 +68,7 @@ services:
       - avito-network
     volumes:
       - avito-postgres-data:/var/lib/postgresql/data
+      - ./configs/dev/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql:ro
     ports:
       - "15432:5432"
    
