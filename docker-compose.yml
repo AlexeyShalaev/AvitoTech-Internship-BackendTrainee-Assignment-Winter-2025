@@ -84,6 +84,33 @@ services:
       start_period: 20s
       retries: 6
 
+  merch-service:
+    build:
+      context: ./services/merch-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:2
+    container_name: avito-merch-service
+    environment:
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://ydb:2136/local
+    networks:
+      - avito-network
+    depends_on:
+      ydb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      coins-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
   postgres:
     image: postgres:17
     container_name: avito-postgres
@@ -96,7 +123,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
-    restart: on-failure:5
+    restart: on-failure:2
     networks:
       - avito-network
     volumes:
@@ -117,7 +144,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: on-failure:5
+    restart: on-failure:2
     ports:
       - "6379:6379"
     networks:
@@ -188,6 +215,23 @@ services:
       - kafka
     networks:
       - avito-network
+
+  ydb:
+    image: ydbplatform/local-ydb:trunk
+    container_name: avito-ydb
+    environment:
+      - "YDB_USE_IN_MEMORY_PDISKS=true"
+      - "POSTGRES_USER=${YDB_PG_USER:-postgres}"
+      - "POSTGRES_PASSWORD=${YDB_PG_PASSWORD:-postgres}"
+      - "YDB_EXPERIMENTAL_PG=1"
+      - YDB_ENABLE_COLUMN_TABLES=true
+    restart: on-failure:2
+    networks:
+      - avito-network
+    ports:
+      - "25432:5432"
+      - "2136:2136"
+      - "8765:8765"
 
 networks:
   avito-network:

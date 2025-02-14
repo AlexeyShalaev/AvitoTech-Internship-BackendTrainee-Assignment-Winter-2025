@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package merch;
+
+service MerchService {
+  rpc BuyMerch(BuyMerchRequest) returns (BuyMerchResponse);
+}
+
+message BuyMerchRequest {
+  string username = 1;
+  string merch_name = 2;
+  string idempotency_key = 3;
+}
+
+message BuyMerchResponse {
+    string transaction_id = 1;
+    string status = 2;
+}
