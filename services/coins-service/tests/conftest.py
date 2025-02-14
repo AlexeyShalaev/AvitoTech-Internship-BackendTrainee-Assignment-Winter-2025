@@ -1,4 +1,5 @@
 
+import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, AsyncEngine, create_async_engine
 from src.core.config import settings
@@ -21,10 +22,10 @@ async def session(connection: AsyncConnection):
         yield _session
 
 
-# @pytest.fixture(scope="session", autouse=True)
-# def event_loop():
-#    import asyncio
-#    """Reference: https://github.com/pytest-dev/pytest-asyncio/issues/38#issuecomment-264418154"""
-#    loop = asyncio.get_event_loop_policy().new_event_loop()
-#    yield loop
-#    loop.close()
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    import asyncio
+    """Reference: https://github.com/pytest-dev/pytest-asyncio/issues/38#issuecomment-264418154"""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()

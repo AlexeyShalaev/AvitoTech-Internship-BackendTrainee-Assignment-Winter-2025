@@ -174,7 +174,7 @@ class CoinsService:
                 account.balance_whole += 1
                 account.balance_fraction -= 100
             account.balance_whole += request.amount_whole
-            
+   
             transaction = Transaction(
                 id=uuid.uuid4(),
                 from_account_id=None,
@@ -185,8 +185,10 @@ class CoinsService:
                 status=TransactionStatus.COMPLETED,
             )
             self._db_session.add(transaction)
+            
         await self._db_session.commit()
         await self._publish_transaction(transaction)
+        
         return coins_pb2.CreditUserResponse(transaction_id=str(transaction.id), status=coins_pb2.Status.COMPLETED)
 
     async def GetBalance(self, request: coins_pb2.GetBalanceRequest) -> coins_pb2.GetBalanceResponse:
@@ -205,7 +207,16 @@ class CoinsService:
         )
 
     async def GetTransactionHistory(self, request: coins_pb2.GetTransactionHistoryRequest) -> coins_pb2.GetTransactionHistoryResponse:
-        stmt = select(Transaction).where((Transaction.from_account_id == request.username) | (Transaction.to_account_id == request.username))
+        stmt = select(Account).where(Account.username == request.username)
+        result = await self._db_session.execute(stmt)
+        account = result.scalar_one_or_none()
+        if not account:
+                raise GrpcException(
+                    status_code=grpc.StatusCode.NOT_FOUND,
+                    details=self.ProblemCode.USER_NOT_FOUND,
+                )
+                
+        stmt = select(Transaction).where((Transaction.from_account_id == account.id) | (Transaction.to_account_id == account.id))
         result = await self._db_session.execute(stmt)
         transactions = result.scalars().all()
         return coins_pb2.GetTransactionHistoryResponse(

@@ -42,7 +42,6 @@ services:
       dockerfile: tests.dockerfile
       additional_contexts:
         proto: ./proto
-    restart: on-failure:2
     container_name: avito-coins-service-test
     environment:
       - ALEMBIC_CFG=/app/alembic.ini

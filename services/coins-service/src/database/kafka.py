@@ -21,7 +21,7 @@ class KafkaProducerSingleton:
             await cls._instance.start()
 
     @classmethod
-    async def get_producer(cls) -> AIOKafkaProducer:
+    def get_producer(cls) -> AIOKafkaProducer:
         return cls._instance
 
     @classmethod
