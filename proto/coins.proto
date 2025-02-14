@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package coins;
+
+service CoinsService {
+  rpc TransferFunds(TransferFundsRequest) returns (TransferFundsResponse);
+  rpc ChargeUser(ChargeUserRequest) returns (ChargeUserResponse);
+  rpc CreditUser(CreditUserRequest) returns (CreditUserResponse);
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+  rpc GetTransactionHistory(GetTransactionHistoryRequest) returns (GetTransactionHistoryResponse);
+}
+
+enum Status {
+    COMPLETED = 0;
+    ROLLBACKED = 1;
+}
+
+enum Type {
+    TRANSFER = 0;
+    PAYMENT = 1;
+    REPLENISHMENT = 2;
+}
+
+// Запрос на перевод средств
+message TransferFundsRequest {
+  string from_username = 1;
+  string to_username = 2;
+  int64 amount_whole = 3;
+  int64 amount_fraction = 4;
+  string idempotency_key = 5;
+}
+
+message TransferFundsResponse {
+  string transaction_id = 1;
+  Status status = 2;
+}
+
+// Запрос на списание средств
+message ChargeUserRequest {
+  string username = 1;
+  int64 amount_whole = 2;
+  int64 amount_fraction = 3;
+  string idempotency_key = 4;
+}
+
+message ChargeUserResponse {
+  string transaction_id = 1;
+  Status status = 2;
+}
+
+// Запрос на начисление средств
+message CreditUserRequest {
+  string username = 1;
+  int64 amount_whole = 2;
+  int64 amount_fraction = 3;
+  string idempotency_key = 4;
+}
+
+message CreditUserResponse {
+  string transaction_id = 1;
+  Status status = 2;
+}
+
+// Запрос баланса
+message GetBalanceRequest {
+  string username = 1;
+}
+
+message GetBalanceResponse {
+  string username = 1;
+  int64 balance_whole = 2;
+  int64 balance_fraction = 3;
+}
+
+// История транзакций
+message GetTransactionHistoryRequest {
+  string username = 1;
+}
+
+message GetTransactionHistoryResponse {
+  repeated Transaction transactions = 1;
+}
+
+// Структура транзакции
+message Transaction {
+  string transaction_id = 1;
+  optional string from_username = 2;
+  optional string to_username = 3;
+  int64 amount_whole = 4;
+  int64 amount_fraction = 5;
+  Type type = 6;
+  Status status = 7;
+  string timestamp = 8;
+}

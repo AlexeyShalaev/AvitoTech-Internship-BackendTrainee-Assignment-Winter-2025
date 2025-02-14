@@ -1,0 +1,12 @@
+alembic==1.13.*
+asyncpg==0.29.*
+psycopg2==2.9.*
+grpcio==1.67.*
+grpcio-tools==1.67.*
+grpc_interceptor==0.15.*
+grpcio-health-checking==1.67.*
+redis==5.1.*
+loguru==0.7.*
+orjson==3.10.*
+aiokafka==0.12.*
+pydantic-settings==2.7.*
