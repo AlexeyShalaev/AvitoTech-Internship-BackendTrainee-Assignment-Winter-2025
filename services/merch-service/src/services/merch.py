@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+import ydb.aio
 import coins_pb2
 import merch_pb2
 import grpc
@@ -18,8 +19,8 @@ class MerchService:
     class ProblemCode(StrEnum):
         MERCH_NOT_FOUND = "Merch not found"
 
-    def __init__(self, db_session: AsyncSession) -> None:
-        self._db_session = db_session
+    def __init__(self, db_pool: ydb.aio.QuerySessionPool) -> None:
+        self._db_pool: ydb.aio.QuerySessionPool = db_pool
 
     async def _publish_selling(self, transaction_id: str, status: str, username: str, merch_name: str, price: int) -> None:
         message = {
@@ -36,8 +37,22 @@ class MerchService:
 
     async def BuyMerch(self, request: merch_pb2.BuyMerchRequest) -> merch_pb2.BuyMerchResponse:
         logger.info(f"BuyMerch request: {request.username}, {request.merch_name}, {request.idempotency_key}")
-        result = await self._db_session.execute(select(Merch).where(Merch.name == request.merch_name))
-        merch: Merch | None = result.scalar()
+        
+        result_sets = await self._db_pool.execute_with_retries(
+            """
+            DECLARE $merchName AS Utf8;
+
+            SELECT
+                id,
+                name,
+                price
+            FROM merchandises
+            WHERE name = $merchName;
+            """,
+            {"$merchName": request.merch_name}
+        )
+        first_set = result_sets[0]
+        merch = first_set[0] if first_set else None
         if not merch:
             raise GrpcException(
                 grpc.StatusCode.NOT_FOUND, 

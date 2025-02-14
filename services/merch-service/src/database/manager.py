@@ -1,43 +1,26 @@
-from collections.abc import AsyncGenerator
-from typing import Any
-
-from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+import ydb
+import ydb.aio
 
 
-class AsyncSessionManager:
+class YDBManager:
     def __init__(
         self,
-        url: str,
-        echo: bool = False,
-        future: bool = True,
-        poolclass: Any = NullPool,
-        session_class: Any = AsyncSession,
-        expire_on_commit: bool = False,
-        connect_args: dict | None = None,
-        isolation_level: str | None = None,
+        endpoint: str,
+        database: str,
     ) -> None:
-        kwargs = {
-            "echo": echo,
-            "future": future,
-            "poolclass": poolclass,
-            "isolation_level": isolation_level,
-        }
-        if connect_args:
-            kwargs["connect_args"] = connect_args
-        if isolation_level:
-            kwargs["isolation_level"] = isolation_level
+        self._driver = ydb.aio.Driver(endpoint=endpoint, database=database)
+        self._connected: bool = False
 
-        engine: AsyncEngine = create_async_engine(url, **kwargs)
-        self._session_maker: sessionmaker = sessionmaker(
-            engine, class_=session_class, expire_on_commit=expire_on_commit
-        )
+    async def connect(self, timeout: int = 30) -> None:
+        if not self._connected:
+            await self._driver.wait(timeout=timeout)
+            self._connected = True
 
-    @property
-    def session_maker(self):
-        return self._session_maker
-
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        async with self._session_maker() as session:
-            yield session
+    async def get_pool(self):
+        async with ydb.aio.QuerySessionPool(self._driver) as pool:
+            yield pool
+    
+    async def close(self) -> None:
+        if self._connected:
+            await self._driver.stop()
+            self._connected = False

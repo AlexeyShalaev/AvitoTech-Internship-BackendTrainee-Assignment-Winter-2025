@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     MODE: WorkingMode = WorkingMode.DEVELOPMENT
     DEBUG: bool = MODE != WorkingMode.PRODUCTION
     ALEMBIC_CFG: str = "alembic.ini"
-    DATABASE_URL: str = "postgresql+asyncpg://localhost:2136/local"
+    DATABASE_HOST: str = "localhost:2136"
+    DATABASE_NAME: str = "local"
     DATABASE_ECHO: bool = False
     
     COINS_SERVICE_HOST: str = "coins-service:50051"

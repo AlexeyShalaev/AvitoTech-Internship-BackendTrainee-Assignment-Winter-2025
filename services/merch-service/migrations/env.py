@@ -38,7 +38,8 @@ try:
     # running in docker with os env
     from src.core.config import settings
 
-    DATABASE_URL = settings.DATABASE_URL
+    DATABASE_HOST = settings.DATABASE_HOST
+    DATABASE_NAME = settings.DATABASE_NAME
 except:
     # running locally with file env
     import os
@@ -47,10 +48,10 @@ except:
     from dotenv import load_dotenv
 
     load_dotenv(dotenv_path=Path("../../config/alembic.env"))
-    DATABASE_URL = os.environ["DATABASE_URL"]
+    DATABASE_HOST = os.environ["DATABASE_HOST"]
+    DATABASE_NAME = os.environ["DATABASE_NAME"]
 finally:
-    db_driver = DATABASE_URL.split("://")[0]
-    DATABASE_URL = DATABASE_URL.replace(db_driver, "yql+ydb")
+    DATABASE_URL = f"yql+ydb://{DATABASE_HOST}/{DATABASE_NAME}"
     config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 

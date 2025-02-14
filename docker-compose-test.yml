@@ -48,6 +48,7 @@ services:
         proto: ./proto
     container_name: avito-coins-service-test
     environment:
+      - MODE=testing
       - ALEMBIC_CFG=/app/alembic.ini
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/coins_service_db
       - REDIS_URL=redis://myuser:mypassword@redis-test:6379/0
@@ -68,11 +69,12 @@ services:
       dockerfile: tests.dockerfile
       additional_contexts:
         proto: ./proto
-    restart: on-failure:2
+    restart: on-failure:1
     container_name: avito-merch-service-test
     environment:
+      - MODE=testing
       - ALEMBIC_CFG=/app/alembic.ini
-      - DATABASE_URL=postgresql+asyncpg://ydb-test:2136/local
+      - DATABASE_URL=yql+ydb://ydb-test:2136/local
       - KAFKA_BOOTSTRAP_SERVERS=kafka-test:9092
     networks:
       - avito-network-test
@@ -112,7 +114,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: on-failure:5
+    restart: on-failure:2
     networks:
       - avito-network-test
     volumes:
@@ -153,6 +155,8 @@ services:
     restart: on-failure:2
     networks:
       - avito-network-test
+    ports:
+      - "2136:2136"
 
 networks:
   avito-network-test:

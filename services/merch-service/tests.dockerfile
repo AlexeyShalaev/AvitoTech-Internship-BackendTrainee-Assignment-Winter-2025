@@ -5,7 +5,7 @@ FROM python:3.11-alpine AS build
 WORKDIR /app
 
 # Install grpcio-tools
-RUN pip install --no-cache-dir grpcio-tools==1.67.*
+RUN pip install --no-cache-dir grpcio-tools==1.62.*
 
 # Copy the proto files
 COPY --from=proto . ./proto

@@ -1,9 +1,8 @@
 from src.core.config import settings
-from src.database.manager import AsyncSessionManager
+from src.database.manager import YDBManager
 
 
-manager = AsyncSessionManager(
-    url=settings.DATABASE_URL,
-    echo=settings.DATABASE_ECHO,
-    isolation_level="REPEATABLE READ",
+manager = YDBManager(
+    endpoint=settings.DATABASE_HOST,
+    database=settings.DATABASE_NAME,
 )
