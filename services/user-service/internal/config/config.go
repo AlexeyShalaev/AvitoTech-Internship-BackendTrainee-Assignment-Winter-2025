@@ -3,11 +3,14 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Config struct {
-	DatabaseURL string
+	DatabaseURL    string
 	MigrationsPath string
+	KafkaBrokers   []string
+	KafkaTopic     string
 }
 
 func Load() *Config {
@@ -20,5 +23,7 @@ func Load() *Config {
 			os.Getenv("POSTGRES_DB"),
 		),
 		MigrationsPath: os.Getenv("MIGRATIONS_PATH"),
+		KafkaBrokers:   strings.Split(os.Getenv("KAFKA_BROKERS"), ","), // Разделяем по запятым
+		KafkaTopic:     os.Getenv("KAFKA_TOPIC"),
 	}
 }

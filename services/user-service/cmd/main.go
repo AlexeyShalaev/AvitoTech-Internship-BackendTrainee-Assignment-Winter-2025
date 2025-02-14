@@ -10,6 +10,7 @@ import (
 
 	"user-service/internal/config"
 	"user-service/internal/db"
+	"user-service/internal/infra/kafka"
 	"user-service/internal/servers/grpc_server"
 	"user-service/internal/services/user"
 
@@ -52,16 +53,31 @@ func runGRPCServer(ctx context.Context, userService pb.UserServiceServer) {
 func main() {
 	cfg := config.Load()
 
+	// Инициализация базы данных
 	dbPool, err := db.InitDB(cfg)
 	if err != nil {
 		log.Fatalf("Database initialization error: %v", err)
 	}
 	defer dbPool.Close()
 
+	// Применение миграций
 	db.ApplyMigrations(cfg.MigrationsPath, cfg.DatabaseURL)
 
+	// Создание топика, если его нет
+	err = kafka.EnsureTopicExists(cfg.KafkaBrokers, cfg.KafkaTopic)
+	if err != nil {
+		log.Fatalf("Failed to create Kafka topic: %v", err)
+	}
+
+	// Инициализация Kafka-продюсера
+	producer := kafka.NewKafkaProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
+	defer producer.Close()
+
+	// Создание сервиса пользователя с Kafka-продюсером
 	userRepo := user.NewRepository(dbPool)
-	userService := user.NewService(userRepo)
+	userService := user.NewService(userRepo, producer)
+
+	// Создание gRPC-сервера
 	grpcServer := grpc_server.NewServer(userService)
 
 	ctx := context.Background()

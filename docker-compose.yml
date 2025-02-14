@@ -39,10 +39,14 @@ services:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: user_service_db
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: user-events
     networks:
       - avito-network
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]

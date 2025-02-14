@@ -30,11 +30,15 @@ services:
       POSTGRES_HOST: postgres-test
       POSTGRES_PORT: 5432
       POSTGRES_DB: user_service_db
+      KAFKA_BROKERS: kafka-test:9092
+      KAFKA_TOPIC: user-events
     networks:
       - avito-network-test
     depends_on:
       postgres-test:
         condition: service_healthy
+      kafka-test:
+        condition: service_started
 
   coins-service-test:
     build:

@@ -33,7 +33,7 @@ func TestCreateUserIfNotExists(t *testing.T) {
 	password := "service_password"
 
 	// Используем testRepo из `repository_test.go`
-	userService := user.NewService(testRepo)
+	userService := user.NewService(testRepo, testProducer)
 
 	user, isNew, err := userService.CreateUserIfNotExists(ctx, username, password)
 	require.NoError(t, err)
