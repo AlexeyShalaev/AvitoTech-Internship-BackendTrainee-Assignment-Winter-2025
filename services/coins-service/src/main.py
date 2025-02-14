@@ -8,7 +8,7 @@ from loguru import logger
 
 from src.core.config import settings
 from src.database.base import run_migrations
-from src.database.kafka import KafkaProducerSingleton, ensure_topics
+from src.kafka import KafkaConsumer, KafkaProducerSingleton, ensure_topics
 from src.interceptors import ExceptionHandler
 from src.servicer import CoinsServiceServicer
 from src.utils.logger import prepare_loggers
@@ -45,8 +45,14 @@ async def serve() -> None:
     server.add_insecure_port(listen_addr)
     
     logger.info(f"Starting server on {listen_addr}")
+    
     await KafkaProducerSingleton.create_producer()
     await ensure_topics([settings.KAFKA_TX_TOPIC_NAME])
+    
+    # Создаём Kafka Consumer
+    kafka_consumer = KafkaConsumer(settings.KAFKA_BOOTSTRAP_SERVERS, settings.KAFKA_USER_TOPIC_NAME)
+    await kafka_consumer.start()
+    
     await server.start()
     await server.wait_for_termination()
     await KafkaProducerSingleton.close()

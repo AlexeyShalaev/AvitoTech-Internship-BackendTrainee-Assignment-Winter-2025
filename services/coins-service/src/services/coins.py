@@ -8,7 +8,7 @@ from sqlalchemy import select
 from loguru import logger
 
 from src.database import redis_client
-from src.database.kafka import KafkaProducerSingleton
+from src.kafka import KafkaProducerSingleton
 from src.core.config import settings
 from src.core.exceptions import GrpcException
 from src.models.account import Account

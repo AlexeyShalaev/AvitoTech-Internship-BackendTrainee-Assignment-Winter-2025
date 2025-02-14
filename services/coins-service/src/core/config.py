@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     KAFKA_BOOTSTRAP_SERVERS: str = "kafka:9092"
     KAFKA_CLIENT_ID: str = "coins-service" 
     KAFKA_TX_TOPIC_NAME: str = "transactions"
+    KAFKA_USER_TOPIC_NAME: str = "user-events"
    
 
 settings = Settings()
