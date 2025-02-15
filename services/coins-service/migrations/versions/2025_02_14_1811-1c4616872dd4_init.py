@@ -35,6 +35,8 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('from_account_id', sa.UUID(), nullable=True),
     sa.Column('to_account_id', sa.UUID(), nullable=True),
+    sa.Column('from_username', sa.VARCHAR(), nullable=True),
+    sa.Column('to_username', sa.VARCHAR(), nullable=True),
     sa.Column('amount_whole', sa.BigInteger(), nullable=False),
     sa.Column('amount_fraction', sa.BigInteger(), nullable=False),
     sa.Column('type', sa.Enum('TRANSFER', 'PAYMENT', 'REPLENISHMENT', name='transaction_type'), nullable=False),

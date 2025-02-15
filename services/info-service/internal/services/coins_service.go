@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log"
 
 	"info-service/internal/proto/coins"
 	"google.golang.org/grpc"
@@ -27,18 +28,33 @@ func NewCoinsService(conn *grpc.ClientConn) CoinsService {
 
 // Получение истории транзакций + баланс из gRPC
 func (s *coinsService) GetTransactionHistory(username string) (*CoinHistoryResponse, error) {
-	// Запрашиваем историю транзакций
+	log.Printf("Fetching transaction history for user: %s", username)
+
+	// Запрашиваем историю транзакций через gRPC
 	req := &coinspb.GetTransactionHistoryRequest{Username: username}
 	resp, err := s.client.GetTransactionHistory(context.Background(), req)
 	if err != nil {
+		log.Printf("Error fetching transaction history for user %s: %v", username, err)
 		return nil, err
 	}
 
-	// Обрабатываем транзакции
+	log.Printf("Total transactions received for user %s: %d", username, len(resp.Transactions))
+
+	// Обрабатываем только транзакции со статусом COMPLETED и типом TRANSFER
 	received := []map[string]interface{}{}
 	sent := []map[string]interface{}{}
+	filteredCount := 0
 
 	for _, tx := range resp.Transactions {
+		// Фильтруем по статусу и типу
+		if tx.Status != coinspb.Status_COMPLETED || tx.Type != coinspb.Type_TRANSFER {
+			filteredCount++
+			continue
+		}
+
+		log.Printf("Processing transaction %s: From=%v To=%v Amount=%d",
+			tx.TransactionId, tx.FromUsername, tx.ToUsername, tx.AmountWhole)
+
 		amount := tx.AmountWhole
 		if tx.FromUsername != nil && *tx.FromUsername == username {
 			sent = append(sent, map[string]interface{}{
@@ -51,11 +67,14 @@ func (s *coinsService) GetTransactionHistory(username string) (*CoinHistoryRespo
 				"amount":   amount,
 			})
 		}
-	}	
+	}
+
+	log.Printf("User %s - Filtered out %d transactions", username, filteredCount)
+	log.Printf("User %s - Total sent transactions: %d, received transactions: %d", username, len(sent), len(received))
 
 	return &CoinHistoryResponse{
-		Received:       received,
-		Sent:           sent,
+		Received: received,
+		Sent:     sent,
 	}, nil
 }
 

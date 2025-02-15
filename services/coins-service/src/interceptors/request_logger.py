@@ -56,8 +56,12 @@ class RequestLogger(AsyncServerInterceptor):
 
         logger.info(log_message)
 
-        # Продолжаем выполнение запроса
-        return await method(request_or_iterator, context)
+        try:
+            # Продолжаем выполнение запроса
+            return await method(request_or_iterator, context)
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            raise
 
     def default_formatter(self, log_data: dict) -> str:
         """

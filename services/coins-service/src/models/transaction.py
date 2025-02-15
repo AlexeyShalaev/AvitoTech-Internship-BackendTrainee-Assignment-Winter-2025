@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from sqlalchemy import TIMESTAMP, BigInteger, CheckConstraint, Column, Enum, ForeignKey, func
+from sqlalchemy import TIMESTAMP, VARCHAR, BigInteger, CheckConstraint, Column, Enum, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.models import BaseTable
@@ -23,6 +23,8 @@ class Transaction(BaseTable):
     id = Column(UUID(as_uuid=True), primary_key=True)
     from_account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=True)
     to_account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=True)
+    from_username = Column(VARCHAR, nullable=True)
+    to_username = Column(VARCHAR, nullable=True)
     amount_whole = Column(BigInteger, nullable=False)
     amount_fraction = Column(BigInteger, nullable=False)
     type = Column(Enum(TransactionType, name="transaction_type"), nullable=False)

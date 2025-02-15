@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     
     MERCH_SERVICE_HOST: str = "merch-service:50051"
     MERCH_SERVICE_TIMEOUT: float = 0.1
+    
+    INFO_SERVICE_HOST: str = "http://info-service:8080"
+    INFO_SERVICE_TIMEOUT: float = 0.1
 
 
 settings = Settings()

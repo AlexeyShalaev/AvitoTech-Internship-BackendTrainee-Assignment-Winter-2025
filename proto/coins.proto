@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package coins;
 
 option go_package = "internal/proto/coins;coinspb";
@@ -88,9 +90,9 @@ message Transaction {
   string transaction_id = 1;
   optional string from_username = 2;
   optional string to_username = 3;
-  int64 amount_whole = 4;
-  int64 amount_fraction = 5;
+  uint64 amount_whole = 4;
+  uint64 amount_fraction = 5;
   Type type = 6;
   Status status = 7;
-  string timestamp = 8;
+  google.protobuf.Timestamp created_at = 8;
 }
