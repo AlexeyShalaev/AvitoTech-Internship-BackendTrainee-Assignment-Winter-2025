@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Cookie, Depends, Request, Response
+from fastapi import APIRouter, Cookie, Depends, Request, Response, HTTPException
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.config import settings
 from src.database import manager
@@ -62,4 +63,3 @@ async def logout_controller(
     )
 
     return {"detail": "User is logged out from current session."}
-

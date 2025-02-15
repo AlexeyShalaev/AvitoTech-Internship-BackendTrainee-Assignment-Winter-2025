@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"log"
+	"time"
 	"user-service/internal/infra/kafka/producer"
 	"user-service/internal/models"
 
@@ -35,12 +36,15 @@ func (s *Service) CreateUserIfNotExists(ctx context.Context, username, password 
 
 	if created {
 		go func() {
-			err := s.producer.SendMessage(ctx, "user_created", user.ID, user.Username)
+			newCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+	
+			err := s.producer.SendMessage(newCtx, "user_created", user.ID, user.Username)
 			if err != nil {
 				log.Printf("Failed to send Kafka message: %v", err)
 			}
 		}()
-	}
+	}	
 
 	return user, created, nil
 }

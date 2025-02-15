@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"time"
 	"user-service/internal/services/user"
 
 	"github.com/segmentio/kafka-go"
@@ -32,6 +33,10 @@ func (kc *KafkaConsumer) StartConsuming(ctx context.Context) {
 	for {
 		msg, err := kc.reader.ReadMessage(ctx)
 		if err != nil {
+			if err.Error() == "EOF" {
+				time.Sleep(500 * time.Millisecond) // Ожидание перед повторной попыткой
+				continue
+			}
 			log.Printf("Kafka Consumer error: %v", err)
 			continue
 		}
@@ -41,7 +46,7 @@ func (kc *KafkaConsumer) StartConsuming(ctx context.Context) {
 			Status        string  `json:"status"`
 			Username      string  `json:"username"`
 			MerchName     string  `json:"merch_name"`
-			Price         float64 `json:"price"`
+			Price         int `json:"price"`
 		}
 
 		if err := json.Unmarshal(msg.Value, &message); err != nil {

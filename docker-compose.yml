@@ -1,4 +1,24 @@
 services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-api-gateway
+    environment:
+      - JWT_SECRET_KEY=c3VwZXJzZWNyZXRrZXk=
+    ports:
+      - "8080:8080"
+    #depends_on:
+    #  - auth-service
+    #  - info-service
+    #  - coins-service
+    #  - merch-service
+    #  - user-service
+    networks:
+      - avito-network
+
   auth-service:
     build:
       context: ./services/auth-service
@@ -10,6 +30,7 @@ services:
     environment:
       - ALEMBIC_CFG=/app/alembic.ini
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/auth_service_db
+      - JWT_SECRET_KEY=c3VwZXJzZWNyZXRrZXk=
     networks:
       - avito-network
     ports:
@@ -100,7 +121,7 @@ services:
       - avito-network
     depends_on:
       ydb:
-        condition: service_healthy
+        condition: service_started
       kafka:
         condition: service_healthy
       coins-service:

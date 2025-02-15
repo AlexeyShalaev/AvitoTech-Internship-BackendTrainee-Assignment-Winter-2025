@@ -62,7 +62,7 @@ class KafkaConsumer:
             id=uuid.uuid4(),
             user_id=uuid.UUID(user_id),
             username=username,
-            balance_whole=0,
+            balance_whole=1000,
             balance_fraction=0,
         )
 

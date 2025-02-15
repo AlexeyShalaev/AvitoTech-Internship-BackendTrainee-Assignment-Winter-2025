@@ -2,7 +2,7 @@ import asyncio
 import pytest
 import pytest_asyncio
 from src.core.config import settings
-from src.database import manager, YDBManager
+from src.database import YDBSingleton, YDBManager
 from src.database.fill import fill_db
 from src.database.migrations import run_migrations
 from src.services import coins
@@ -20,15 +20,14 @@ def event_loop():
     
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def setup_and_teardown():
-    global manager
-    
+async def setup_and_teardown():    
     await run_migrations(settings.DATABASE_HOST, settings.DATABASE_NAME)
     
     manager = YDBManager(
         endpoint=settings.DATABASE_HOST,
         database=settings.DATABASE_NAME,
     )
+    YDBSingleton.set_instance(manager)
     await manager.connect()
     await fill_db(manager.get_pool())
     
@@ -39,4 +38,4 @@ async def setup_and_teardown():
 
 @pytest.fixture()
 def pool():
-    return manager.get_pool()
+    return YDBSingleton.get_instance().get_pool()

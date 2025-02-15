@@ -9,10 +9,9 @@ from loguru import logger
 from src.core.config import settings
 from src.database.base import run_migrations
 from src.kafka import KafkaConsumer, KafkaProducerSingleton, ensure_topics
-from src.interceptors import ExceptionHandler
+from src.interceptors import ExceptionHandler, RequestLogger
 from src.servicer import CoinsServiceServicer
 from src.utils.logger import prepare_loggers
-
 
 
 async def serve() -> None:
@@ -23,7 +22,8 @@ async def serve() -> None:
         migration_thread_pool=futures.ThreadPoolExecutor(),
         compression=grpc.Compression.Gzip,
         interceptors=[
-            ExceptionHandler()
+            ExceptionHandler(),
+            RequestLogger(),
         ]
     )
     

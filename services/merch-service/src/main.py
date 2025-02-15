@@ -7,17 +7,16 @@ from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from loguru import logger
 
 from src.core.config import settings
-from src.database import manager, YDBManager
+from src.database import YDBSingleton, YDBManager
 from src.database.fill import fill_db
 from src.database.migrations import run_migrations
 from src.kafka import KafkaProducerSingleton, ensure_topics
-from src.interceptors import ExceptionHandler
+from src.interceptors import ExceptionHandler, RequestLogger
 from src.servicer import MerchServiceServicer
 from src.utils.logger import prepare_loggers
 
 
 async def serve() -> None:
-    global manager
     prepare_loggers(debug=settings.DEBUG)
     
     await run_migrations(settings.DATABASE_HOST, settings.DATABASE_NAME)
@@ -26,7 +25,8 @@ async def serve() -> None:
         migration_thread_pool=futures.ThreadPoolExecutor(),
         compression=grpc.Compression.Gzip,
         interceptors=[
-            ExceptionHandler()
+            ExceptionHandler(),
+            RequestLogger()
         ]
     )
     
@@ -50,6 +50,7 @@ async def serve() -> None:
         endpoint=settings.DATABASE_HOST,
         database=settings.DATABASE_NAME,
     )
+    YDBSingleton.set_instance(manager)
     await manager.connect()
     await fill_db(manager.get_pool())
 

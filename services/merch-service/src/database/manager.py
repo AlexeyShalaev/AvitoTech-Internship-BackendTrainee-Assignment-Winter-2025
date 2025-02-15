@@ -28,3 +28,24 @@ class YDBManager:
             await self._driver.stop()
             self._pool = None
             logger.info("Connection to YDB closed")
+
+class YDBSingleton:
+    _instance: YDBManager | None = None
+
+    @classmethod
+    def set_instance(cls, instance: YDBManager) -> None:
+        """
+        Устанавливает глобальный инстанс YDBManager.
+        """
+        cls._instance = instance
+        logger.info("YDBManager instance set")
+
+    @classmethod
+    def get_instance(cls) -> YDBManager:
+        """
+        Возвращает глобальный инстанс YDBManager.
+        """
+        if cls._instance is None:
+            raise RuntimeError("YDBManager instance is not set. Call `set_instance` first.")
+        return cls._instance
+    

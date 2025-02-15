@@ -1,0 +1,11 @@
+pydantic==2.10.*
+pydantic-settings==2.7.*
+
+fastapi==0.115.*
+uvicorn[standrd]==0.34.*
+prometheus-fastapi-instrumentator==7.0.*
+
+grpcio==1.67.*
+grpcio-tools==1.67.*
+python-jose[cryptography]==3.3.*
+loguru==0.7.*

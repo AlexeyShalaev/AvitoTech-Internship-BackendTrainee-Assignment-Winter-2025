@@ -4,6 +4,7 @@ import ydb.aio
 import coins_pb2
 import merch_pb2
 import grpc
+import orjson
 from loguru import logger
 
 from src.kafka import KafkaProducerSingleton
@@ -28,7 +29,7 @@ class MerchService:
             "price": price
         }
         try:
-            await KafkaProducerSingleton.get_producer().send_and_wait(settings.KAFKA_MERCH_TOPIC_NAME, value=message)
+            await KafkaProducerSingleton.get_producer().send_and_wait(settings.KAFKA_MERCH_TOPIC_NAME, value=orjson.dumps(message))
         except Exception as e:
             logger.error(f"Failed to publish selling to Kafka: {e}")
 

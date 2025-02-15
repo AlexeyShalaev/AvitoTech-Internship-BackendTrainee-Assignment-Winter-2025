@@ -25,10 +25,11 @@ class TokenBasedAuthentication:
         REFRESH_TOKEN_NOT_PROVIDED = "Refresh token not provided"
 
     def __init__(
-        self, access_token_expires_in: int, refresh_token_expires_in: int
+        self, access_token_expires_in: int, refresh_token_expires_in: int, issuer: str = "http://auth-service"
     ) -> None:
-        self._access_token_expires_in = access_token_expires_in
-        self._refresh_token_expires_in = refresh_token_expires_in
+        self._access_token_expires_in: int = access_token_expires_in
+        self._refresh_token_expires_in: int = refresh_token_expires_in
+        self._issuer: str = issuer
 
     async def create_session(
         self,
@@ -154,6 +155,7 @@ class TokenBasedAuthentication:
             "user_id": str(user_id),
             "username": username,
             "exp": current_datetime + timedelta(seconds=self._access_token_expires_in),
+            "iss": self._issuer,
         }
 
     def _get_user_agent(self, request: Request) -> str:
