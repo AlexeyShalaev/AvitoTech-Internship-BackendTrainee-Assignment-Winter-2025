@@ -27,8 +27,8 @@ enum Type {
 message TransferFundsRequest {
   string from_username = 1;
   string to_username = 2;
-  int64 amount_whole = 3;
-  int64 amount_fraction = 4;
+  uint64 amount_whole = 3;
+  uint64 amount_fraction = 4;
   string idempotency_key = 5;
 }
 

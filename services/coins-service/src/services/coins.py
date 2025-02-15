@@ -3,6 +3,7 @@ from enum import StrEnum
 
 import coins_pb2
 import grpc
+import orjson
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from loguru import logger
@@ -20,6 +21,8 @@ class CoinsService:
         USER_NOT_FOUND = "User not found"
         INSUFFICIENT_FUNDS = "Insufficient funds"
         DUPLICATE_REQUEST = "Duplicate request"
+        CAN_NOT_SEND_TO_YOURSELF = "Can not send coins to yourself"
+        INVALID_AMOUNT = "Invalid amount"
 
     def __init__(self, db_session: AsyncSession) -> None:
         self._db_session = db_session
@@ -44,7 +47,7 @@ class CoinsService:
             "status": transaction.status.value,
         }
         try:
-            await KafkaProducerSingleton.get_producer().send_and_wait(settings.KAFKA_TX_TOPIC_NAME, value=message)
+            await KafkaProducerSingleton.get_producer().send_and_wait(settings.KAFKA_TX_TOPIC_NAME, value=orjson.dumps(message))
         except Exception as e:
             logger.error(f"Failed to publish transaction {transaction.id} to Kafka: {e}")
 
@@ -53,6 +56,20 @@ class CoinsService:
             raise GrpcException(
                 status_code=grpc.StatusCode.ALREADY_EXISTS,
                 details=self.ProblemCode.DUPLICATE_REQUEST,
+            )
+            
+        if request.from_username == request.to_username:
+            raise GrpcException(
+                status_code=grpc.StatusCode.FAILED_PRECONDITION,
+                details=self.ProblemCode.CAN_NOT_SEND_TO_YOURSELF,
+            )
+        
+        if request.amount_whole < 0 or request.amount_fraction < 0 or \
+            request.amount_fraction >= 100 or \
+                request.amount_whole == 0 and request.amount_fraction == 0:
+            raise GrpcException(
+                status_code=grpc.StatusCode.INVALID_ARGUMENT,
+                details=self.ProblemCode.INVALID_AMOUNT,
             )
 
         async with self._db_session.begin():
