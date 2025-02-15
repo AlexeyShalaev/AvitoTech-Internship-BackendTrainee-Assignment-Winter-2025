@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 import pytest
 import pytest_asyncio
@@ -22,6 +23,8 @@ def event_loop():
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_and_teardown():
+    time.sleep(3)
+    
     await run_migrations(settings.DATABASE_HOST, settings.DATABASE_NAME)
 
     manager = YDBManager(
