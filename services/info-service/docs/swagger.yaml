@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Info Service
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/info:
+    get:
+      summary: Получить информацию о монетах, инвентаре и истории транзакций.
+      responses:
+        '200':
+          description: Успешный ответ.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoResponse'
+        '400':
+          description: Неверный запрос.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизован.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    InfoResponse:
+      type: object
+      properties:
+        coins:
+          type: integer
+          description: Количество доступных монет.
+        inventory:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Тип предмета.
+              quantity:
+                type: integer
+                description: Количество предметов.
+        coinHistory:
+          type: object
+          properties:
+            received:
+              type: array
+              items:
+                type: object
+                properties:
+                  fromUser:
+                    type: string
+                    description: Имя пользователя, который отправил монеты.
+                  amount:
+                    type: integer
+                    description: Количество полученных монет.
+            sent:
+              type: array
+              items:
+                type: object
+                properties:
+                  toUser:
+                    type: string
+                    description: Имя пользователя, которому отправлены монеты.
+                  amount:
+                    type: integer
+                    description: Количество отправленных монет.
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: string
+          description: Сообщение об ошибке, описывающее проблему.

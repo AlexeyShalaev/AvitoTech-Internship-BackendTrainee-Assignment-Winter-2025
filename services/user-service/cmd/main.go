@@ -15,7 +15,7 @@ import (
 	"user-service/internal/servers/grpc_server"
 	"user-service/internal/services/user"
 
-	pb "user-service/internal/proto"
+	pb "user-service/internal/proto/user"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"

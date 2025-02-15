@@ -25,7 +25,9 @@ RUN go mod download
 
 COPY . .
 
+RUN mkdir internal/proto
+
 # Генерируем gRPC-код
-RUN protoc --go_out=internal --go-grpc_out=internal -I/proto /proto/user.proto
+RUN protoc --go_out=. --go-grpc_out=. -I/proto /proto/user.proto
 
 CMD ["go", "test", "./..."]

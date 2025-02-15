@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package coins;
 
+option go_package = "internal/proto/coins;coinspb";
+
 service CoinsService {
   rpc TransferFunds(TransferFundsRequest) returns (TransferFundsResponse);
   rpc ChargeUser(ChargeUserRequest) returns (ChargeUserResponse);

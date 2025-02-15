@@ -84,6 +84,20 @@ services:
       kafka-test:
         condition: service_started
 
+  info-service-test:
+    build:
+      context: ./services/info-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-info-service-test
+    environment:
+      SERVER_PORT: 8080
+      USER_SERVICE: user-service-test:50051
+      COINS_SERVICE: coins-service-test:50051
+    networks:
+      - avito-network-test
+        
   postgres-test:
     image: postgres:17
     container_name: avito-postgres-test

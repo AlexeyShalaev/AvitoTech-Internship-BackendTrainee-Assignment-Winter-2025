@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "internal/proto;userpb";
+option go_package = "internal/proto/user;userpb";
 
 service UserService {
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
