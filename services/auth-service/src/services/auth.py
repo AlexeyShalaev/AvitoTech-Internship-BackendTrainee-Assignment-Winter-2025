@@ -25,7 +25,10 @@ class TokenBasedAuthentication:
         REFRESH_TOKEN_NOT_PROVIDED = "Refresh token not provided"
 
     def __init__(
-        self, access_token_expires_in: int, refresh_token_expires_in: int, issuer: str = "http://auth-service"
+        self,
+        access_token_expires_in: int,
+        refresh_token_expires_in: int,
+        issuer: str = "http://auth-service",
     ) -> None:
         self._access_token_expires_in: int = access_token_expires_in
         self._refresh_token_expires_in: int = refresh_token_expires_in
@@ -41,11 +44,11 @@ class TokenBasedAuthentication:
     ) -> str:
         # Check if the user exist
         async with UserServiceClient() as user_client:
-            user: user_pb2.CreateIfNotExistsResponse = await user_client.create_if_not_exists(username, password)
+            user: user_pb2.CreateIfNotExistsResponse = (
+                await user_client.create_if_not_exists(username, password)
+            )
 
-            if not user.is_new and not verify_password(
-                user.hashed_password, password
-            ):
+            if not user.is_new and not verify_password(user.hashed_password, password):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=self.ProblemCode.INCORRECT_PROVIDED_DATA.value,
@@ -57,7 +60,7 @@ class TokenBasedAuthentication:
         session_expires_in = current_datetime + timedelta(
             seconds=self._refresh_token_expires_in
         )
-        
+
         await db_session.execute(
             insert(Session).values(
                 user_id=user.id,
@@ -70,7 +73,9 @@ class TokenBasedAuthentication:
         await db_session.commit()
 
         # Create Access Token
-        session_data: dict = self._create_session_data(user.id, user.username, current_datetime)
+        session_data: dict = self._create_session_data(
+            user.id, user.username, current_datetime
+        )
 
         # Store refresh token in cookie
         response.set_cookie(
@@ -119,12 +124,16 @@ class TokenBasedAuthentication:
                 detail=self.ProblemCode.TOKEN_EXPIRED,
                 headers=TokenBasedAuthentication.delete_refresh_token_headers,
             )
-            
+
         async with UserServiceClient() as user_client:
-            user: user_pb2.GetUserByIdResponse = await user_client.get_by_id(str(session.user_id))
-            
+            user: user_pb2.GetUserByIdResponse = await user_client.get_by_id(
+                str(session.user_id)
+            )
+
         # Create Access Token
-        session_data: dict = self._create_session_data(user.id, user.username, current_datetime)
+        session_data: dict = self._create_session_data(
+            user.id, user.username, current_datetime
+        )
 
         # Store refresh token in cookie
         response.set_cookie(
@@ -150,7 +159,9 @@ class TokenBasedAuthentication:
         # Delete cookie
         response.delete_cookie(self.refresh_token_key)
 
-    def _create_session_data(self, user_id: str, username: str, current_datetime: datetime) -> dict:
+    def _create_session_data(
+        self, user_id: str, username: str, current_datetime: datetime
+    ) -> dict:
         return {
             "user_id": str(user_id),
             "username": username,

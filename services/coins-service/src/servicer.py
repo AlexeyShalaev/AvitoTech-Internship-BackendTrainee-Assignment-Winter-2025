@@ -1,13 +1,15 @@
-import grpc
 import coins_pb2
 import coins_pb2_grpc
+import grpc
 from src.database import manager
 from src.services.coins import CoinsService
 
 
 class CoinsServiceServicer(coins_pb2_grpc.CoinsService):
     async def TransferFunds(
-        self, request: coins_pb2.TransferFundsRequest, context: grpc.aio.ServicerContext,
+        self,
+        request: coins_pb2.TransferFundsRequest,
+        context: grpc.aio.ServicerContext,
     ) -> coins_pb2.TransferFundsResponse:
         async with manager.session_maker() as session:
             return await CoinsService(session).TransferFunds(request)
@@ -37,7 +39,9 @@ class CoinsServiceServicer(coins_pb2_grpc.CoinsService):
             return await CoinsService(session).GetBalance(request)
 
     async def GetTransactionHistory(
-        self, request: coins_pb2.GetTransactionHistoryRequest, context: grpc.aio.ServicerContext
+        self,
+        request: coins_pb2.GetTransactionHistoryRequest,
+        context: grpc.aio.ServicerContext,
     ) -> coins_pb2.GetTransactionHistoryResponse:
         async with manager.session_maker() as session:
             return await CoinsService(session).GetTransactionHistory(request)

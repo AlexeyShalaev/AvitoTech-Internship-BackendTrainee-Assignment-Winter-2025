@@ -77,8 +77,8 @@ func EnsureTopicExists(brokers []string, topic string) error {
 	// Создаём топик, если его нет
 	err = conn.CreateTopics(kafka.TopicConfig{
 		Topic:             topic,
-		NumPartitions:     3,  // Количество партиций (можно изменить)
-		ReplicationFactor: 1,  // Фактор репликации (должен быть >= 1)
+		NumPartitions:     3, // Количество партиций (можно изменить)
+		ReplicationFactor: 1, // Фактор репликации (должен быть >= 1)
 	})
 	if err != nil {
 		return err

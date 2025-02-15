@@ -1,9 +1,8 @@
 import pytest
 from sqlalchemy import create_engine
-from yarl import URL
-
 from src.core.config import settings
 from utils import alembic_config_from_url, tmp_database
+from yarl import URL
 
 
 @pytest.fixture

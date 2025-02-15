@@ -1,6 +1,7 @@
 import asyncio
-import orjson
 import uuid
+
+import orjson
 from aiokafka import AIOKafkaConsumer
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession

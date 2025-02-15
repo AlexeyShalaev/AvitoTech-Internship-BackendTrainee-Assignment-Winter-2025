@@ -1,9 +1,7 @@
 import time
 
 from fastapi import APIRouter, HTTPException, status
-
 from src.database import check_database_connection
-
 
 router = APIRouter(prefix="/health", tags=["health"])
 

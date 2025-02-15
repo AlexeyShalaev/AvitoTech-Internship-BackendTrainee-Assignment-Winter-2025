@@ -1,8 +1,6 @@
 from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base
-
 from src.core.constants import DB_NAMING_CONVENTION
-
 
 Base = declarative_base(metadata=MetaData(naming_convention=DB_NAMING_CONVENTION))
 
@@ -39,5 +37,7 @@ class BaseTable(Base):
     __abstract__ = True
 
     def __repr__(self):
-        columns = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        columns = {
+            column.name: getattr(self, column.name) for column in self.__table__.columns
+        }
         return f'<{self.__tablename__}: {", ".join(map(lambda x: f"{x[0]}={x[1]}", columns.items()))}>'

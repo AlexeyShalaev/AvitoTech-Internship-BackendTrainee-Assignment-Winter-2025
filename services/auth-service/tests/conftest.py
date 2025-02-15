@@ -1,11 +1,15 @@
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncSession, create_async_engine
-
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    AsyncEngine,
+    AsyncSession,
+    create_async_engine,
+)
 from src.core.config import settings
 from src.services import user
 from tests.mocks import MockUserServiceClient
 
-user.UserServiceClient = MockUserServiceClient # Monkey patching
+user.UserServiceClient = MockUserServiceClient  # Monkey patching
 
 
 @pytest_asyncio.fixture()

@@ -42,11 +42,11 @@ func (kc *KafkaConsumer) StartConsuming(ctx context.Context) {
 		}
 
 		var message struct {
-			TransactionID string  `json:"transaction_id"`
-			Status        string  `json:"status"`
-			Username      string  `json:"username"`
-			MerchName     string  `json:"merch_name"`
-			Price         int `json:"price"`
+			TransactionID string `json:"transaction_id"`
+			Status        string `json:"status"`
+			Username      string `json:"username"`
+			MerchName     string `json:"merch_name"`
+			Price         int    `json:"price"`
 		}
 
 		if err := json.Unmarshal(msg.Value, &message); err != nil {

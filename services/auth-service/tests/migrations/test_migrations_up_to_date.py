@@ -6,7 +6,6 @@ about models for some reason (or vice versa).
 from alembic.autogenerate import compare_metadata
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine
-
 from src.models import Base
 
 

@@ -7,6 +7,10 @@ from src.services.merch import MerchService
 
 class MerchServiceServicer(merch_pb2_grpc.MerchService):
     async def BuyMerch(
-        self, request: merch_pb2.BuyMerchRequest, context: grpc.aio.ServicerContext,
+        self,
+        request: merch_pb2.BuyMerchRequest,
+        context: grpc.aio.ServicerContext,
     ) -> merch_pb2.BuyMerchResponse:
-        return await MerchService(YDBSingleton.get_instance().get_pool()).BuyMerch(request)
+        return await MerchService(YDBSingleton.get_instance().get_pool()).BuyMerch(
+            request
+        )

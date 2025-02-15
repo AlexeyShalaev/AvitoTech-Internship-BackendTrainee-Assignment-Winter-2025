@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
-	"info-service/internal/proto/user"
 	"google.golang.org/grpc"
+	"info-service/internal/proto/user"
 )
 
 type UserService interface {

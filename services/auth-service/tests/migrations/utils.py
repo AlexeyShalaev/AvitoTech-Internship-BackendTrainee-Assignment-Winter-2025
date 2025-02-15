@@ -9,15 +9,15 @@ from typing import List, Optional, Union
 from alembic.config import Config
 from configargparse import Namespace
 from sqlalchemy_utils import create_database, drop_database
-from yarl import URL
-
 from src import __name__ as project_name
-
+from yarl import URL
 
 PROJECT_PATH = os.getcwd()
 
 
-def make_alembic_config(cmd_opts: Union[Namespace, SimpleNamespace], base_path: str = PROJECT_PATH) -> Config:
+def make_alembic_config(
+    cmd_opts: Union[Namespace, SimpleNamespace], base_path: str = PROJECT_PATH
+) -> Config:
     # Replace path to alembic.ini file to absolute
     if not os.path.isabs(cmd_opts.config):
         cmd_opts.config = os.path.join(base_path, cmd_opts.config)
@@ -27,7 +27,9 @@ def make_alembic_config(cmd_opts: Union[Namespace, SimpleNamespace], base_path: 
     # Replace path to alembic folder to absolute
     alembic_location = config.get_main_option("script_location")
     if not os.path.isabs(alembic_location):
-        config.set_main_option("script_location", os.path.join(base_path, alembic_location))
+        config.set_main_option(
+            "script_location", os.path.join(base_path, alembic_location)
+        )
     if cmd_opts.pg_url:
         config.set_main_option("sqlalchemy.url", cmd_opts.pg_url)
 
@@ -77,7 +79,9 @@ def make_validation_params_groups(*migrations) -> List[MigrationValidationParams
         # Ensure migration has all required params
         for required_param in ["rev_base", "rev_head"]:
             if not hasattr(migration, required_param):
-                raise RuntimeError(f"{required_param} not specified for {migration.__name__}")
+                raise RuntimeError(
+                    f"{required_param} not specified for {migration.__name__}"
+                )
 
         # Set up callbacks
         callbacks = defaultdict(lambda: lambda *args, **kwargs: None)

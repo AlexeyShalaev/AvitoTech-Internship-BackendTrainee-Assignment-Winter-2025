@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	DatabaseURL    string
-	MigrationsPath string
-	KafkaBrokers   []string
-	KafkaTopic     string
+	DatabaseURL     string
+	MigrationsPath  string
+	KafkaBrokers    []string
+	KafkaTopic      string
 	KafkaMerchTopic string
 }
 
@@ -23,9 +23,9 @@ func Load() *Config {
 			os.Getenv("POSTGRES_PORT"),
 			os.Getenv("POSTGRES_DB"),
 		),
-		MigrationsPath: os.Getenv("MIGRATIONS_PATH"),
-		KafkaBrokers:   strings.Split(os.Getenv("KAFKA_BROKERS"), ","), // Разделяем по запятым
-		KafkaTopic:     os.Getenv("KAFKA_TOPIC"),
+		MigrationsPath:  os.Getenv("MIGRATIONS_PATH"),
+		KafkaBrokers:    strings.Split(os.Getenv("KAFKA_BROKERS"), ","), // Разделяем по запятым
+		KafkaTopic:      os.Getenv("KAFKA_TOPIC"),
 		KafkaMerchTopic: os.Getenv("KAFKA_MERCH_TOPIC"),
 	}
 }

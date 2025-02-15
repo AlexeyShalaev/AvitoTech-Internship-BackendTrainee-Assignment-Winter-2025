@@ -25,17 +25,19 @@ class Settings(BaseSettings):
     PORT: int = 8080
 
     ALEMBIC_CFG: str = "alembic.ini"
-    DATABASE_URL: SecretStr = SecretStr("postgresql+asyncpg://postgres:postgres@localhost:15432/postgres")
+    DATABASE_URL: SecretStr = SecretStr(
+        "postgresql+asyncpg://postgres:postgres@localhost:15432/postgres"
+    )
     DATABASE_ECHO: bool = False
 
     CORS_ALLOW_ORIGINS: list[str] = ["*"]
-    
+
     JWT_SECRET_KEY: SecretStr = "secret"
     JWT_ALGORITHM: SecretStr = "HS256"
 
     ACCESS_TOKEN_EXPIRES_IN: int = 1200000
     REFRESH_TOKEN_EXPIRES_IN: int = 2592000
-    
+
     USER_SERVICE_HOST: str = "user-service:50051"
     USER_SERVICE_TIMEOUT: float = 0.1
 

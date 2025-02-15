@@ -8,9 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from loguru import logger
 from prometheus_fastapi_instrumentator import Instrumentator
-
 from src.core.config import WorkingMode, settings
-from src.middlewares import LoggingMiddleware, ProcessingTimeMiddelware, GRPCErrorHandlingMiddleware, AuthorizationMiddleware, AuthenticationMiddleware, IdempotencyMiddleware
+from src.middlewares import (
+    AuthenticationMiddleware,
+    AuthorizationMiddleware,
+    GRPCErrorHandlingMiddleware,
+    IdempotencyMiddleware,
+    LoggingMiddleware,
+    ProcessingTimeMiddelware,
+)
 from src.routers import api_router
 from src.routers.health import router as health_router
 
@@ -18,7 +24,9 @@ from src.routers.health import router as health_router
 @asynccontextmanager
 async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
 
-    instrumentator.expose(application, include_in_schema=False, endpoint=settings.METRICS_PATH)
+    instrumentator.expose(
+        application, include_in_schema=False, endpoint=settings.METRICS_PATH
+    )
 
     logger.info("Application started.")
 
@@ -49,9 +57,9 @@ def get_app() -> FastAPI:
 
     application.include_router(health_router)
     application.include_router(api_router)
-    
+
     application.add_middleware(GRPCErrorHandlingMiddleware)
-    
+
     application.add_middleware(IdempotencyMiddleware)
 
     allowed_path_prefixes = [

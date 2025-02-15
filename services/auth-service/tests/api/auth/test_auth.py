@@ -15,7 +15,9 @@ async def test_login_wrong_password(client: AsyncClient):
         },
     )
     assert res.status_code == 400
-    assert res.json() == {"detail": TokenBasedAuthentication.ProblemCode.INCORRECT_PROVIDED_DATA}
+    assert res.json() == {
+        "detail": TokenBasedAuthentication.ProblemCode.INCORRECT_PROVIDED_DATA
+    }
 
 
 @pytest.mark.asyncio()

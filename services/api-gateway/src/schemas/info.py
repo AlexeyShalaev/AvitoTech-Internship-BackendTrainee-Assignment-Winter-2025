@@ -9,8 +9,8 @@ class Item(BaseModel):
 class ReceivedCoins(BaseModel):
     fromUser: str
     amount: int
-    
-    
+
+
 class SentCoins(BaseModel):
     toUser: str
     amount: int
@@ -25,4 +25,3 @@ class InfoResponse(BaseModel):
     coins: int
     inventory: list[Item]
     coinHistory: CoinsHistory
-    

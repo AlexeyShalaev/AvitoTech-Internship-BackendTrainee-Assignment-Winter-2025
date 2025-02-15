@@ -1,11 +1,12 @@
+import uuid
+
+import coins_pb2
+import grpc
 import pytest
 import pytest_asyncio
-import grpc
-import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.services.coins import CoinsService
 from src.models.account import Account
-import coins_pb2
+from src.services.coins import CoinsService
 
 
 class TestGetBalance:
@@ -15,7 +16,11 @@ class TestGetBalance:
         self.service = CoinsService(self.session)
 
         self.user = Account(
-            id=uuid.uuid4(), user_id=uuid.uuid4(), username="user1", balance_whole=100, balance_fraction=50
+            id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
+            username="user1",
+            balance_whole=100,
+            balance_fraction=50,
         )
         self.session.add(self.user)
         await self.session.commit()

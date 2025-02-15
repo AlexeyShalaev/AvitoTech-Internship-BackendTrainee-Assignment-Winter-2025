@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	defer dbPool.Close()
 
 	db.ApplyMigrations(cfg.MigrationsPath, cfg.DatabaseURL)
-	
+
 	// Инициализируем Kafka-продюсер
 	testProducer = kafka_producer.NewKafkaProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer testProducer.Close()

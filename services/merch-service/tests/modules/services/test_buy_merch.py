@@ -1,9 +1,10 @@
 import uuid
+
+import coins_pb2
+import merch_pb2
 import pytest
 import pytest_asyncio
 from src.services.merch import MerchService
-import merch_pb2
-import coins_pb2
 
 
 class TestBuyMerch:
@@ -20,5 +21,5 @@ class TestBuyMerch:
             idempotency_key=str(uuid.uuid4()),
         )
         response = await self.service.BuyMerch(request)
-        
+
         assert response.status == coins_pb2.Status.Name(coins_pb2.Status.COMPLETED)

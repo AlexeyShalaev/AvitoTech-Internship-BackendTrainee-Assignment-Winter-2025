@@ -47,7 +47,6 @@ func TestCreateUserIfNotExists(t *testing.T) {
 	require.Equal(t, user.ID, user2.ID)
 }
 
-
 func VerifyPassword(password, hash string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

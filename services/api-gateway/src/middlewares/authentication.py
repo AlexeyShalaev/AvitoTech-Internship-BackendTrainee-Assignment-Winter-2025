@@ -6,11 +6,11 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
     def __init__(
-        self, 
-        app: ASGIApp, 
-        jwt_secret: str, 
-        jwt_algorithms: list[str], 
-        jwt_issuer: str | None = None
+        self,
+        app: ASGIApp,
+        jwt_secret: str,
+        jwt_algorithms: list[str],
+        jwt_issuer: str | None = None,
     ) -> None:
         super().__init__(app)
         self._jwt_secret = jwt_secret
@@ -37,7 +37,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 self._jwt_secret,
                 algorithms=self._jwt_algorithms,
                 options={"verify_aud": False},
-                issuer=self._jwt_issuer
+                issuer=self._jwt_issuer,
             )
             return decoded
         except (ValueError, UnicodeDecodeError, JWTError) as e:

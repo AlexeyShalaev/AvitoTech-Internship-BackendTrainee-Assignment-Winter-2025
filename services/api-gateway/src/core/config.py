@@ -25,19 +25,19 @@ class Settings(BaseSettings):
     PORT: int = 8080
 
     CORS_ALLOW_ORIGINS: list[str] = ["*"]
-    
+
     JWT_SECRET_KEY: SecretStr = "secret"
     JWT_ALGORITHM: SecretStr = "HS256"
-    
+
     USER_SERVICE_HOST: str = "user-service:50051"
     USER_SERVICE_TIMEOUT: float = 0.1
-    
+
     COINS_SERVICE_HOST: str = "coins-service:50051"
     COINS_SERVICE_TIMEOUT: float = 0.1
-    
+
     MERCH_SERVICE_HOST: str = "merch-service:50051"
     MERCH_SERVICE_TIMEOUT: float = 0.1
-    
+
     INFO_SERVICE_HOST: str = "http://info-service:8080"
     INFO_SERVICE_TIMEOUT: float = 0.1
 

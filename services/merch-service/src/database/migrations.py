@@ -1,10 +1,13 @@
 import os
+
 import ydb
 from loguru import logger
 
 
 class YDBMigrationManager:
-    def __init__(self, endpoint: str, database: str, migrations_dir: str = "migrations"):
+    def __init__(
+        self, endpoint: str, database: str, migrations_dir: str = "migrations"
+    ):
         self._migrations_dir: str = migrations_dir
         self._driver = ydb.aio.Driver(endpoint=endpoint, database=database)
         self._pool: ydb.aio.QuerySessionPool | None = None
@@ -24,28 +27,33 @@ class YDBMigrationManager:
     async def execute(self, query: str, params: dict = None):
         """Выполняет SQL-запрос"""
         return await self._pool.execute_with_retries(
-            f"PRAGMA TablePathPrefix('{self._table_prefix}');\n{query}", 
-            params or {}
+            f"PRAGMA TablePathPrefix('{self._table_prefix}');\n{query}", params or {}
         )
 
     async def ensure_migrations_table(self):
         """Создает таблицу migrations, если её нет"""
         try:
-            await self.execute(f"""
+            await self.execute(
+                f"""
                 CREATE TABLE IF NOT EXISTS migrations (
                     id Utf8,
                     applied_at Timestamp,
                     PRIMARY KEY (id)
                 );
-            """)
-            logger.info("✅ Таблица `migrations` проверена (создана, если не существовала).")
+            """
+            )
+            logger.info(
+                "✅ Таблица `migrations` проверена (создана, если не существовала)."
+            )
         except Exception as e:
             logger.error(f"❌ Ошибка при создании таблицы `migrations`: {e}")
 
     async def applied_migrations(self):
         """Получает список уже примененных миграций"""
         try:
-            result_sets = await self.execute("SELECT id FROM migrations ORDER BY applied_at DESC")
+            result_sets = await self.execute(
+                "SELECT id FROM migrations ORDER BY applied_at DESC"
+            )
             return [row["id"] for row in result_sets[0].rows]
         except Exception as ex:
             logger.error(f"❌ Ошибка при получении списка примененных миграций: {ex}")
@@ -78,9 +86,11 @@ class YDBMigrationManager:
         logger.info(f"🔄 Откат миграции: {last_migration}")
         with open(down_file, "r") as f:
             sql = f.read()
-        
+
         await self.execute(sql)
-        await self.execute("DELETE FROM migrations WHERE id = $id;", {"$id": last_migration})
+        await self.execute(
+            "DELETE FROM migrations WHERE id = $id;", {"$id": last_migration}
+        )
 
         logger.info(f"✅ Миграция {last_migration} откатена.")
         await self.close()
@@ -90,7 +100,11 @@ class YDBMigrationManager:
         await self.connect()
         await self.ensure_migrations_table()
         applied = set(await self.applied_migrations())
-        migration_files = sorted(f for f in os.listdir(self._migrations_dir) if f.endswith(".sql") and not f.endswith(".down.sql"))
+        migration_files = sorted(
+            f
+            for f in os.listdir(self._migrations_dir)
+            if f.endswith(".sql") and not f.endswith(".down.sql")
+        )
 
         for filename in migration_files:
             if filename not in applied:
@@ -103,13 +117,21 @@ class YDBMigrationManager:
         await self.close()
 
 
-async def run_migrations(endpoint: str, database: str, migrations_dir: str = "migrations"):
+async def run_migrations(
+    endpoint: str, database: str, migrations_dir: str = "migrations"
+):
     """Запускает миграции при старте приложения"""
-    manager = YDBMigrationManager(endpoint=endpoint, database=database, migrations_dir=migrations_dir)
+    manager = YDBMigrationManager(
+        endpoint=endpoint, database=database, migrations_dir=migrations_dir
+    )
     await manager.migrate()
 
 
-async def rollback_last_migration(endpoint: str, database: str, migrations_dir: str = "migrations"):
+async def rollback_last_migration(
+    endpoint: str, database: str, migrations_dir: str = "migrations"
+):
     """Запускает откат последней миграции"""
-    manager = YDBMigrationManager(endpoint=endpoint, database=database, migrations_dir=migrations_dir)
+    manager = YDBMigrationManager(
+        endpoint=endpoint, database=database, migrations_dir=migrations_dir
+    )
     await manager.rollback_migration()

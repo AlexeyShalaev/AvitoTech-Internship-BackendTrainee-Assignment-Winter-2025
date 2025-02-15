@@ -2,7 +2,6 @@ from typing import Any, Callable
 
 import grpc
 from grpc_interceptor import AsyncServerInterceptor
-
 from src.core.exceptions import GrpcException
 
 

@@ -1,9 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-
 from src.core.config import settings
 from src.database.manager import AsyncSessionManager
-
 
 manager = AsyncSessionManager(
     url=settings.DATABASE_URL.get_secret_value(),

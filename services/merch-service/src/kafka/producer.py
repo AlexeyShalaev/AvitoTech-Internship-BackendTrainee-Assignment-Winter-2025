@@ -1,6 +1,5 @@
 from aiokafka import AIOKafkaProducer
 from aiokafka.admin import AIOKafkaAdminClient, NewTopic
-
 from src.core.config import settings
 
 
@@ -32,12 +31,17 @@ class KafkaProducerSingleton:
 
 
 async def ensure_topics(topics: list[str]):
-    admin_client = AIOKafkaAdminClient(bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS)
+    admin_client = AIOKafkaAdminClient(
+        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS
+    )
     await admin_client.start()
     try:
         existing_topics = await admin_client.list_topics()
-        new_topics = [NewTopic(name=topic_name, num_partitions=3, replication_factor=1) for topic_name in topics if topic_name not in existing_topics]
+        new_topics = [
+            NewTopic(name=topic_name, num_partitions=3, replication_factor=1)
+            for topic_name in topics
+            if topic_name not in existing_topics
+        ]
         await admin_client.create_topics(new_topics)
     finally:
         await admin_client.close()
-        

@@ -1,8 +1,6 @@
 import redis.asyncio as aioredis
-
 from src.core.config import settings
 from src.database.manager import AsyncSessionManager
-
 
 manager = AsyncSessionManager(
     url=settings.DATABASE_URL,

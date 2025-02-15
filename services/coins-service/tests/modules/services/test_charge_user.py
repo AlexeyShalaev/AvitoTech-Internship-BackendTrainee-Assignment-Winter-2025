@@ -1,11 +1,12 @@
+import uuid
+
+import coins_pb2
+import grpc
 import pytest
 import pytest_asyncio
-import grpc
-import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.services.coins import CoinsService
 from src.models.account import Account
-import coins_pb2
+from src.services.coins import CoinsService
 
 
 class TestChargeUser:
@@ -15,7 +16,11 @@ class TestChargeUser:
         self.service = CoinsService(self.session)
 
         self.user = Account(
-            id=uuid.uuid4(), user_id=uuid.uuid4(), username="user1", balance_whole=50, balance_fraction=30
+            id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
+            username="user1",
+            balance_whole=50,
+            balance_fraction=30,
         )
         self.session.add(self.user)
         await self.session.commit()
@@ -29,7 +34,7 @@ class TestChargeUser:
             idempotency_key=str(uuid.uuid4()),
         )
         response = await self.service.ChargeUser(request)
-        
+
         assert response.status == coins_pb2.Status.COMPLETED
 
         updated_user = await self.session.get(Account, self.user.id)

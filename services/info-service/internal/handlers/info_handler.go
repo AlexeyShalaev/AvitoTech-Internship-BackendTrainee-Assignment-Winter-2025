@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"info-service/internal/services"

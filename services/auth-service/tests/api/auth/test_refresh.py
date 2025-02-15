@@ -10,7 +10,9 @@ AUTH_ENDPOINT = "/api/auth"
 async def test_refresh_without_refresh_token(client: AsyncClient):
     res = await client.post(REFRESH_ENDPOINT)
     assert res.status_code == 404
-    assert res.json() == {"detail": TokenBasedAuthentication.ProblemCode.SESSION_NOT_FOUND}
+    assert res.json() == {
+        "detail": TokenBasedAuthentication.ProblemCode.SESSION_NOT_FOUND
+    }
     assert TokenBasedAuthentication.delete_refresh_token_headers[
         "Set-Cookie"
     ] in res.headers.get("set-cookie")

@@ -7,14 +7,15 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
-
 PROCESSING_TIME_HEADER = "X-Processing-Time"
 
 _processing_time: ContextVar[int | None] = ContextVar("processing_time", default=None)
 
 
 class ProcessingTimeMiddelware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
         with processing_time_counter() as total_time_ms:
             response = await call_next(request)
         response.headers[PROCESSING_TIME_HEADER] = str(total_time_ms.get())

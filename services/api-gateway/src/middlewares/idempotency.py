@@ -1,7 +1,8 @@
 import uuid
+
+from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
-from loguru import logger
 
 
 class IdempotencyMiddleware(BaseHTTPMiddleware):

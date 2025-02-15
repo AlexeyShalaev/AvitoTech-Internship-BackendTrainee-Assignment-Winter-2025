@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"info-service/internal/proto/coins"
 	"google.golang.org/grpc"
+	"info-service/internal/proto/coins"
 )
 
 type CoinsService interface {
@@ -14,8 +14,8 @@ type CoinsService interface {
 }
 
 type CoinHistoryResponse struct {
-	Received       []map[string]interface{}
-	Sent           []map[string]interface{}
+	Received []map[string]interface{}
+	Sent     []map[string]interface{}
 }
 
 type coinsService struct {

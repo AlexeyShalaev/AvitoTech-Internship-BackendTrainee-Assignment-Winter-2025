@@ -38,13 +38,13 @@ func (s *Service) CreateUserIfNotExists(ctx context.Context, username, password 
 		go func() {
 			newCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-	
+
 			err := s.producer.SendMessage(newCtx, "user_created", user.ID, user.Username)
 			if err != nil {
 				log.Printf("Failed to send Kafka message: %v", err)
 			}
 		}()
-	}	
+	}
 
 	return user, created, nil
 }
@@ -65,7 +65,6 @@ func (s *Service) GetUserInventory(ctx context.Context, username string) ([]mode
 
 	return s.repo.GetUserInventory(ctx, userID)
 }
-
 
 // ======= Новый метод обновления инвентаря =======
 func (s *Service) UpdateUserInventory(ctx context.Context, username, merchName string) error {
