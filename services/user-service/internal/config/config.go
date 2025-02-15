@@ -11,6 +11,7 @@ type Config struct {
 	MigrationsPath string
 	KafkaBrokers   []string
 	KafkaTopic     string
+	KafkaMerchTopic string
 }
 
 func Load() *Config {
@@ -25,5 +26,6 @@ func Load() *Config {
 		MigrationsPath: os.Getenv("MIGRATIONS_PATH"),
 		KafkaBrokers:   strings.Split(os.Getenv("KAFKA_BROKERS"), ","), // Разделяем по запятым
 		KafkaTopic:     os.Getenv("KAFKA_TOPIC"),
+		KafkaMerchTopic: os.Getenv("KAFKA_MERCH_TOPIC"),
 	}
 }

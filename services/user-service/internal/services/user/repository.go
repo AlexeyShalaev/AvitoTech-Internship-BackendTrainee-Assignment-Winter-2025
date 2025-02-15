@@ -46,3 +46,61 @@ func (r *Repository) CreateIfNotExists(ctx context.Context, username, hashedPass
 	user.HashedPassword = hashedPassword
 	return &user, true, nil
 }
+
+func (r *Repository) GetUserIDByUsername(ctx context.Context, username string) (string, error) {
+	var userID string
+	err := r.db.QueryRow(ctx, "SELECT id FROM users WHERE username=$1", username).Scan(&userID)
+	if err != nil {
+		return "", err
+	}
+	return userID, nil
+}
+
+func (r *Repository) GetUserInventory(ctx context.Context, userID string) ([]models.InventoryItem, error) {
+	rows, err := r.db.Query(ctx, "SELECT merch, quantity FROM inventory WHERE user_id=$1", userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []models.InventoryItem
+	for rows.Next() {
+		var item models.InventoryItem
+		if err := rows.Scan(&item.Merch, &item.Quantity); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
+// ======= Новые методы для работы с инвентарем =======
+func (r *Repository) AddOrUpdateInventory(ctx context.Context, userID, merchName string) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx) // Откат при ошибке
+
+	// Блокируем строку для обновления
+	var quantity int
+	err = tx.QueryRow(ctx, "SELECT quantity FROM inventory WHERE user_id=$1 AND merch=$2 FOR UPDATE", userID, merchName).
+		Scan(&quantity)
+
+	if err != nil {
+		// Если запись не найдена, вставляем новую
+		_, err = tx.Exec(ctx, "INSERT INTO inventory (user_id, merch, quantity) VALUES ($1, $2, 1)", userID, merchName)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Если запись есть, увеличиваем quantity
+		_, err = tx.Exec(ctx, "UPDATE inventory SET quantity = quantity + 1 WHERE user_id=$1 AND merch=$2", userID, merchName)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx) // Фиксируем транзакцию
+}

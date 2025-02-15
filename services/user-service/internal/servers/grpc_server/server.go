@@ -42,3 +42,20 @@ func (s *Server) CreateIfNotExists(ctx context.Context, req *pb.CreateIfNotExist
 		IsNew:          isNew,
 	}, nil
 }
+
+func (s *Server) GetUserInventory(ctx context.Context, req *pb.GetUserInventoryRequest) (*pb.GetUserInventoryResponse, error) {
+	items, err := s.userService.GetUserInventory(ctx, req.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	var response pb.GetUserInventoryResponse
+	for _, item := range items {
+		response.Items = append(response.Items, &pb.InventoryItem{
+			Merch:    item.Merch,
+			Quantity: int32(item.Quantity),
+		})
+	}
+
+	return &response, nil
+}

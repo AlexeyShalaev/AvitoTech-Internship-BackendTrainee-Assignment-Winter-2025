@@ -32,6 +32,7 @@ services:
       POSTGRES_DB: user_service_db
       KAFKA_BROKERS: kafka-test:9092
       KAFKA_TOPIC: user-events
+      KAFKA_MERCH_TOPIC: merch
     networks:
       - avito-network-test
     depends_on:

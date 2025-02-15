@@ -8,14 +8,14 @@ import (
 
 	"user-service/internal/config"
 	"user-service/internal/db"
-	"user-service/internal/infra/kafka"
+	"user-service/internal/infra/kafka/producer"
 	"user-service/internal/services/user"
 
 	"github.com/stretchr/testify/require"
 )
 
 var testRepo *user.Repository
-var testProducer *kafka.KafkaProducer
+var testProducer *kafka_producer.KafkaProducer
 
 func TestMain(m *testing.M) {
 	// Загружаем конфиг
@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 	db.ApplyMigrations(cfg.MigrationsPath, cfg.DatabaseURL)
 	
 	// Инициализируем Kafka-продюсер
-	testProducer = kafka.NewKafkaProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
+	testProducer = kafka_producer.NewKafkaProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer testProducer.Close()
 
 	// Инициализируем репозиторий

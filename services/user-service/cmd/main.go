@@ -10,7 +10,8 @@ import (
 
 	"user-service/internal/config"
 	"user-service/internal/db"
-	"user-service/internal/infra/kafka"
+	"user-service/internal/infra/kafka/consumer"
+	"user-service/internal/infra/kafka/producer"
 	"user-service/internal/servers/grpc_server"
 	"user-service/internal/services/user"
 
@@ -64,22 +65,27 @@ func main() {
 	db.ApplyMigrations(cfg.MigrationsPath, cfg.DatabaseURL)
 
 	// Создание топика, если его нет
-	err = kafka.EnsureTopicExists(cfg.KafkaBrokers, cfg.KafkaTopic)
+	err = kafka_producer.EnsureTopicExists(cfg.KafkaBrokers, cfg.KafkaTopic)
 	if err != nil {
 		log.Fatalf("Failed to create Kafka topic: %v", err)
 	}
 
 	// Инициализация Kafka-продюсера
-	producer := kafka.NewKafkaProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
+	producer := kafka_producer.NewKafkaProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer producer.Close()
 
 	// Создание сервиса пользователя с Kafka-продюсером
 	userRepo := user.NewRepository(dbPool)
 	userService := user.NewService(userRepo, producer)
 
+	// Запускаем Kafka Consumer
+	consumer := kafka_consumer.NewKafkaConsumer(cfg.KafkaBrokers, cfg.KafkaMerchTopic, userService)
+	ctx := context.Background()
+	go consumer.StartConsuming(ctx)
+	defer consumer.Close()
+
 	// Создание gRPC-сервера
 	grpcServer := grpc_server.NewServer(userService)
 
-	ctx := context.Background()
 	runGRPCServer(ctx, grpcServer)
 }

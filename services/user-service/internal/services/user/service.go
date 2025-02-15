@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"log"
-	"user-service/internal/infra/kafka"
+	"user-service/internal/infra/kafka/producer"
 	"user-service/internal/models"
 
 	"golang.org/x/crypto/bcrypt"
@@ -11,10 +11,10 @@ import (
 
 type Service struct {
 	repo     *Repository
-	producer *kafka.KafkaProducer
+	producer *kafka_producer.KafkaProducer
 }
 
-func NewService(repo *Repository, producer *kafka.KafkaProducer) *Service {
+func NewService(repo *Repository, producer *kafka_producer.KafkaProducer) *Service {
 	return &Service{repo: repo, producer: producer}
 }
 
@@ -51,4 +51,29 @@ func HashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hashed), nil
+}
+
+func (s *Service) GetUserInventory(ctx context.Context, username string) ([]models.InventoryItem, error) {
+	userID, err := s.repo.GetUserIDByUsername(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repo.GetUserInventory(ctx, userID)
+}
+
+
+// ======= Новый метод обновления инвентаря =======
+func (s *Service) UpdateUserInventory(ctx context.Context, username, merchName string) error {
+	userID, err := s.repo.GetUserIDByUsername(ctx, username)
+	if err != nil {
+		log.Printf("User not found: %s", username)
+		return err
+	}
+
+	err = s.repo.AddOrUpdateInventory(ctx, userID, merchName)
+	if err != nil {
+		log.Printf("Failed to update inventory for user %s: %v", username, err)
+	}
+	return err
 }
