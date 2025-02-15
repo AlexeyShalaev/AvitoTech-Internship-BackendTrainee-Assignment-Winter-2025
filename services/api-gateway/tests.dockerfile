@@ -13,10 +13,10 @@ COPY --from=proto . ./proto
 RUN mkdir stubs
 
 # Compile the proto files into Python gRPC files
-RUN find ./protos -name "*.proto" -exec python -m grpc_tools.protoc \
+RUN find ./proto -name "*.proto" -exec python -m grpc_tools.protoc \
     --python_out=stubs \
     --grpc_python_out=stubs \
-    --proto_path=./protos {} +
+    --proto_path=./proto {} +
 
 # Stage 2: Run Application
 FROM python:3.11-slim

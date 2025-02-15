@@ -10,12 +10,12 @@ services:
       - JWT_SECRET_KEY=c3VwZXJzZWNyZXRrZXk=
     ports:
       - "8080:8080"
-    #depends_on:
-    #  - auth-service
-    #  - info-service
-    #  - coins-service
-    #  - merch-service
-    #  - user-service
+    depends_on:
+      - auth-service
+      - info-service
+      - coins-service
+      - merch-service
+      - user-service
     networks:
       - avito-network
 

@@ -1,4 +1,14 @@
 services:
+  api-gateway-test:
+    build:
+      context: ./services/api-gateway
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-api-gateway-test
+    networks:
+      - avito-network-test
+
   auth-service-test:
     build:
       context: ./services/auth-service
