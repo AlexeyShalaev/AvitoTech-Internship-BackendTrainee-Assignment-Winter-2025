@@ -12,10 +12,9 @@ class WorkingMode(StrEnum):
 class Settings(BaseSettings):
     MODE: WorkingMode = WorkingMode.DEVELOPMENT
     DEBUG: bool = MODE != WorkingMode.PRODUCTION
-    ALEMBIC_CFG: str = "alembic.ini"
-    DATABASE_HOST: str = "localhost:2136"
-    DATABASE_NAME: str = "local"
-    DATABASE_ECHO: bool = False
+    
+    DATABASE_HOST: str = "grpc://localhost:2136"
+    DATABASE_NAME: str = "/local"
     
     COINS_SERVICE_HOST: str = "coins-service:50051"
     COINS_SERVICE_TIMEOUT: float = 0.1

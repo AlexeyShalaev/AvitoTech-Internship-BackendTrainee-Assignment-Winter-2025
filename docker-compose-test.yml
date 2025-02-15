@@ -69,12 +69,11 @@ services:
       dockerfile: tests.dockerfile
       additional_contexts:
         proto: ./proto
-    restart: on-failure:1
     container_name: avito-merch-service-test
     environment:
       - MODE=testing
-      - ALEMBIC_CFG=/app/alembic.ini
-      - DATABASE_URL=yql+ydb://ydb-test:2136/local
+      - DATABASE_HOST=grpc://ydb-test:2136
+      - DATABASE_NAME=/local
       - KAFKA_BOOTSTRAP_SERVERS=kafka-test:9092
     networks:
       - avito-network-test
@@ -147,16 +146,11 @@ services:
     image: ydbplatform/local-ydb:trunk
     container_name: avito-ydb-test
     environment:
-      - "YDB_USE_IN_MEMORY_PDISKS=true"
-      - "POSTGRES_USER=${YDB_PG_USER:-postgres}"
-      - "POSTGRES_PASSWORD=${YDB_PG_PASSWORD:-postgres}"
-      - "YDB_EXPERIMENTAL_PG=1"
+      - YDB_USE_IN_MEMORY_PDISKS=true
       - YDB_ENABLE_COLUMN_TABLES=true
     restart: on-failure:2
     networks:
       - avito-network-test
-    ports:
-      - "2136:2136"
 
 networks:
   avito-network-test:

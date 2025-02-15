@@ -4,15 +4,12 @@ import ydb.aio
 import coins_pb2
 import merch_pb2
 import grpc
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from loguru import logger
 
 from src.kafka import KafkaProducerSingleton
 from src.core.config import settings
 from src.core.exceptions import GrpcException
 from src.services.coins import CoinsServiceClient
-from src.models.merch import Merch
 
 
 class MerchService:
@@ -51,8 +48,9 @@ class MerchService:
             """,
             {"$merchName": request.merch_name}
         )
-        first_set = result_sets[0]
-        merch = first_set[0] if first_set else None
+        first_set_rows = result_sets[0].rows
+        merch = first_set_rows[0] if first_set_rows else None
+
         if not merch:
             raise GrpcException(
                 grpc.StatusCode.NOT_FOUND, 
@@ -71,9 +69,9 @@ class MerchService:
                 status_code=e.code(),
                 details=e.details(),
             )
-            
+        
         status: str = coins_pb2.Status.Name(response.status)
-            
+     
         logger.info(f"BuyMerch response: {response.transaction_id}, {status}")
 
         await self._publish_selling(response.transaction_id, status, request.username, merch.name, merch.price)

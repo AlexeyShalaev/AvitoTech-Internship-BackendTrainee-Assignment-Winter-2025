@@ -1,0 +1,1 @@
+ALTER TABLE merchandises ADD INDEX merch_name_idx GLOBAL ON (name);

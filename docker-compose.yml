@@ -93,8 +93,8 @@ services:
     restart: on-failure:2
     container_name: avito-merch-service
     environment:
-      - ALEMBIC_CFG=/app/alembic.ini
-      - DATABASE_URL=postgresql+asyncpg://ydb:2136/local
+      - DATABASE_HOST=grpc://ydb:2136
+      - DATABASE_NAME=/local
     networks:
       - avito-network
     depends_on:
@@ -220,17 +220,12 @@ services:
     image: ydbplatform/local-ydb:trunk
     container_name: avito-ydb
     environment:
-      - "YDB_USE_IN_MEMORY_PDISKS=true"
-      - "POSTGRES_USER=${YDB_PG_USER:-postgres}"
-      - "POSTGRES_PASSWORD=${YDB_PG_PASSWORD:-postgres}"
-      - "YDB_EXPERIMENTAL_PG=1"
+      - YDB_USE_IN_MEMORY_PDISKS=true
       - YDB_ENABLE_COLUMN_TABLES=true
     restart: on-failure:2
     networks:
       - avito-network
     ports:
-      - "25432:5432"
-      - "2136:2136"
       - "8765:8765"
 
 networks:

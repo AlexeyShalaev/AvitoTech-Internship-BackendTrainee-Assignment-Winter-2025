@@ -57,8 +57,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy compiled proto files from the build stage
 COPY --from=build /app/stubs/ ./stubs/
 
-COPY alembic.ini /app/
-
 COPY ./migrations /app/migrations
 
 COPY ./src /app/src

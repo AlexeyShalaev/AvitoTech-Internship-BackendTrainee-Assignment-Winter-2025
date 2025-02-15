@@ -1,24 +1,42 @@
+import asyncio
+import pytest
 import pytest_asyncio
 from src.core.config import settings
-from src.database import manager
-from src.database.base import run_migrations
+from src.database import manager, YDBManager
+from src.database.fill import fill_db
+from src.database.migrations import run_migrations
 from src.services import coins
 from mocks import MockCoinsServiceClient
 
 coins.CoinsServiceClient = MockCoinsServiceClient # Monkey patching
-run_migrations(settings.ALEMBIC_CFG)
 
+
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    """Reference: https://github.com/pytest-dev/pytest-asyncio/issues/38#issuecomment-264418154"""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+    
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_and_teardown():
+    global manager
+    
+    await run_migrations(settings.DATABASE_HOST, settings.DATABASE_NAME)
+    
+    manager = YDBManager(
+        endpoint=settings.DATABASE_HOST,
+        database=settings.DATABASE_NAME,
+    )
     await manager.connect()
+    await fill_db(manager.get_pool())
     
     yield
     
     await manager.close()
 
 
-@pytest_asyncio.fixture()
-async def pool():
-    async with manager.get_pool() as _pool:
-        yield _pool
+@pytest.fixture()
+def pool():
+    return manager.get_pool()

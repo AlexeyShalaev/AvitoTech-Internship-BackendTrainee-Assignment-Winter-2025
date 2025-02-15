@@ -1,5 +1,5 @@
 import ydb
-import ydb.aio
+from loguru import logger
 
 
 class YDBManager:
@@ -9,18 +9,22 @@ class YDBManager:
         database: str,
     ) -> None:
         self._driver = ydb.aio.Driver(endpoint=endpoint, database=database)
-        self._connected: bool = False
+        self._pool: ydb.aio.QuerySessionPool  | None = None
 
-    async def connect(self, timeout: int = 30) -> None:
-        if not self._connected:
+    async def connect(self, timeout: int = 10) -> None:
+        if not self._pool:
+            logger.info("Connecting to YDB")
             await self._driver.wait(timeout=timeout)
-            self._connected = True
+            self._pool = ydb.aio.QuerySessionPool(self._driver)
+            logger.info("Connected to YDB")
 
-    async def get_pool(self):
-        async with ydb.aio.QuerySessionPool(self._driver) as pool:
-            yield pool
+    def get_pool(self):
+        return self._pool
     
     async def close(self) -> None:
-        if self._connected:
+        if self._pool:
+            logger.info("Closing connection to YDB")
+            await self._pool.stop()
             await self._driver.stop()
-            self._connected = False
+            self._pool = None
+            logger.info("Connection to YDB closed")
