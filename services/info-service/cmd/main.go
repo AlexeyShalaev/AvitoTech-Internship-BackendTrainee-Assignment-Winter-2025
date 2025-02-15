@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/encoding/gzip"
 
 	"info-service/internal/config"
 	"info-service/internal/routes"
@@ -18,13 +17,13 @@ func main() {
 	cfg := config.Load()
 
 	// gRPC подключения
-	userConn, err := grpc.Dial(cfg.UserServiceAddr, grpc.WithInsecure(), grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)))
+	userConn, err := grpc.Dial(cfg.UserServiceAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к UserService: %v", err)
 	}
 	defer userConn.Close()
 
-	coinsConn, err := grpc.Dial(cfg.CoinsServiceAddr, grpc.WithInsecure(), grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)))
+	coinsConn, err := grpc.Dial(cfg.CoinsServiceAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к CoinsService: %v", err)
 	}

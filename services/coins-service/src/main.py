@@ -20,7 +20,6 @@ async def serve() -> None:
 
     server = grpc.aio.server(
         migration_thread_pool=futures.ThreadPoolExecutor(),
-        compression=grpc.Compression.Gzip,
         interceptors=[
             ExceptionHandler(),
             RequestLogger(),
