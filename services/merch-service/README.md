@@ -1,1 +1,1 @@
-# Coins Service
+# Merch Service

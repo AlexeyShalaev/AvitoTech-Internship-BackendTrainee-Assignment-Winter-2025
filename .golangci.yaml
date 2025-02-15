@@ -26,6 +26,3 @@ issues:
       text: "Function has too many lines"  # Игнорировать длинные функции
 
   exclude-use-default: false  # Используем только наши правила
-
-output:
-  format: tab  # Вывод ошибок в удобном формате
