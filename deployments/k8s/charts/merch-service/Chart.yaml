@@ -1,0 +1,5 @@
+apiVersion: v2
+name: merch-service
+description: Helm chart for Merch Service
+version: 0.1.0
+appVersion: "1.0"

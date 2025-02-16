@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: {{ .Values.apiGateway.replicas }}
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.apiGateway.ports[0].containerPort }}
+          env:
+            - name: JWT_SECRET_KEY
+              value: "{{ .Values.apiGateway.env.JWT_SECRET_KEY }}"

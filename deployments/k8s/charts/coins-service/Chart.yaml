@@ -1,0 +1,5 @@
+apiVersion: v2
+name: coins-service
+description: Helm chart for Coins Service
+version: 0.1.0
+appVersion: "1.0"

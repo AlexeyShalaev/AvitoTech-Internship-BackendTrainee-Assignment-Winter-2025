@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: {{ .Values.userService.replicas }}
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: "{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.userService.ports[0].containerPort }}
+          env:
+            - name: POSTGRES_USER
+              value: "{{ .Values.userService.env.POSTGRES_USER }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.userService.env.POSTGRES_PASSWORD }}"
+            - name: KAFKA_BROKERS
+              value: "{{ .Values.userService.env.KAFKA_BROKERS }}"
+            - name: KAFKA_TOPIC
+              value: "{{ .Values.userService.env.KAFKA_TOPIC }}"
