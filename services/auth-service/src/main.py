@@ -93,7 +93,7 @@ def main() -> None:
     workers = 1
     cpu_cnt = os.cpu_count()
     if settings.MODE == WorkingMode.PRODUCTION and cpu_cnt is not None:
-        workers = 1  # cpu_cnt * 2 + 1
+        workers = cpu_cnt * 2 + 1
 
     logger.info(f"Running app with {workers} workers.")
 
