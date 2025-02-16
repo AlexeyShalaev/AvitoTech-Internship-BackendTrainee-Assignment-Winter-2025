@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: {{ .Values.authService.replicas }}
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: "{{ .Values.authService.image.repository }}:{{ .Values.authService.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.authService.ports[0].containerPort }}
+          env:
+            - name: JWT_SECRET_KEY
+              value: "{{ .Values.authService.env.JWT_SECRET_KEY }}"
+            - name: DATABASE_URL
+              value: "{{ .Values.authService.env.DATABASE_URL }}"

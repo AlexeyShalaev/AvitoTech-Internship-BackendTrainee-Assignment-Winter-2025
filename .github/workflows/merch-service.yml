@@ -1,0 +1,30 @@
+name: Merch Service Tests
+
+on:
+  workflow_call:
+
+env:
+  VERSION: 1.0.${{ github.run_number }}
+
+jobs:
+  test:
+    name: Run Merch Service Tests
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        run: |
+          until docker info; do sleep 1; done
+
+      - name: Build and run tests
+        run: |
+          docker compose -f docker-compose-test.yml up --build merch-service-test
+          docker_exec_exit_code=$(docker inspect -f '{{.State.ExitCode}}' avito-merch-service-test)
+          exit $docker_exec_exit_code

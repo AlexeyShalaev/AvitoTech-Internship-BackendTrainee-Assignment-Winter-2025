@@ -1,0 +1,9 @@
+.git
+.gitignore
+*.md
+
+# Файлы и каталоги Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd

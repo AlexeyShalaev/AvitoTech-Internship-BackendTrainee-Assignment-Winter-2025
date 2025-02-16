@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-service
+spec:
+  replicas: {{ .Values.infoService.replicas }}
+  selector:
+    matchLabels:
+      app: info-service
+  template:
+    metadata:
+      labels:
+        app: info-service
+    spec:
+      containers:
+        - name: info-service
+          image: "{{ .Values.infoService.image.repository }}:{{ .Values.infoService.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.infoService.ports[0].containerPort }}
+          env:
+            - name: SERVER_PORT
+              value: "{{ .Values.infoService.env.SERVER_PORT }}"
+            - name: USER_SERVICE
+              value: "{{ .Values.infoService.env.USER_SERVICE }}"
+            - name: COINS_SERVICE
+              value: "{{ .Values.infoService.env.COINS_SERVICE }}"

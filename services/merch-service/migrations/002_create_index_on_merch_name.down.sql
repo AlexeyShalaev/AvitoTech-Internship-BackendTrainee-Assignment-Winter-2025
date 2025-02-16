@@ -1,0 +1,1 @@
+ALTER TABLE merchandises DROP INDEX merch_name_idx;

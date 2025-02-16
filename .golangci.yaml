@@ -1,0 +1,28 @@
+run:
+  timeout: 5m  # Максимальное время работы линтера
+
+linters:
+  enable:
+    - errcheck  # Проверка необработанных ошибок
+    - govet  # Проверка подозрительного кода
+    - staticcheck  # Улучшенные проверки (аналог golangci-lint)
+    - ineffassign  # Неиспользуемые переменные
+    - gofmt  # Форматирование кода
+    - goimports  # Автоимпорты
+    - unparam  # Ненужные параметры функций
+    - goconst  # Использование констант вместо дублирующихся строк/чисел
+    - gocyclo  # Сложность кода (выше 15 - предупреждение)
+    - misspell  # Проверка опечаток
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15  # Разрешена сложность до 15
+  misspell:
+    locale: "US"  # Проверка на английские слова
+
+issues:
+  exclude-rules:
+    - linters: [gocyclo]
+      text: "Function has too many lines"  # Игнорировать длинные функции
+
+  exclude-use-default: false  # Используем только наши правила

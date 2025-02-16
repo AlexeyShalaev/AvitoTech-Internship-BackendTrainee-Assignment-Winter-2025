@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avito-clickhouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avito-clickhouse
+  template:
+    metadata:
+      labels:
+        app: avito-clickhouse
+    spec:
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:latest
+          ports:
+            - containerPort: 9000
+            - containerPort: 8123
+          env:
+            - name: CLICKHOUSE_USER
+              value: default
+            - name: CLICKHOUSE_PASSWORD
+              value: secret
+          volumeMounts:
+            - name: clickhouse-data
+              mountPath: /var/lib/clickhouse
+      volumes:
+        - name: clickhouse-data
+          persistentVolumeClaim:
+            claimName: avito-clickhouse-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avito-clickhouse
+spec:
+  ports:
+    - port: 8123
+      targetPort: 8123
+    - port: 9000
+      targetPort: 9000
+  selector:
+    app: avito-clickhouse

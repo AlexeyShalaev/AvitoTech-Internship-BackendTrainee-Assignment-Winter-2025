@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avito-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avito-redis
+  template:
+    metadata:
+      labels:
+        app: avito-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          env:
+            - name: REDIS_PASSWORD
+              value: password
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+            - name: redis-config
+              mountPath: /usr/local/etc/redis/redis.conf
+              subPath: redis.conf
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: avito-redis-pvc
+        - name: redis-config
+          configMap:
+            name: avito-redis-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avito-redis
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: avito-redis

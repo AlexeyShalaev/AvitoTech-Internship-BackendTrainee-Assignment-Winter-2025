@@ -1,0 +1,9 @@
+grpcio==1.62.*
+grpcio-tools==1.62.*
+grpc_interceptor==0.15.*
+grpcio-health-checking==1.62.*
+loguru==0.7.*
+orjson==3.10.*
+aiokafka==0.12.*
+pydantic-settings==2.7.*
+ydb==3.18.*

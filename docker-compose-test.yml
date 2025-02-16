@@ -1,0 +1,183 @@
+services:
+  api-gateway-test:
+    build:
+      context: ./services/api-gateway
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-api-gateway-test
+    networks:
+      - avito-network-test
+
+  auth-service-test:
+    build:
+      context: ./services/auth-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-auth-service-test
+    environment:
+      - MODE=testing
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/auth_service_db
+    networks:
+      - avito-network-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+
+  user-service-test:
+    build:
+      context: ./services/user-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-user-service-test
+    environment:
+      MIGRATIONS_PATH: /app/migrations
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: postgres-test
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: user_service_db
+      KAFKA_BROKERS: kafka-test:9092
+      KAFKA_TOPIC: user-events
+      KAFKA_MERCH_TOPIC: merch
+    networks:
+      - avito-network-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      kafka-test:
+        condition: service_started
+
+  coins-service-test:
+    build:
+      context: ./services/coins-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-coins-service-test
+    environment:
+      - MODE=testing
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/coins_service_db
+      - REDIS_URL=redis://myuser:mypassword@redis-test:6379/0
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-test:9092
+    networks:
+      - avito-network-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+      kafka-test:
+        condition: service_started
+
+  merch-service-test:
+    build:
+      context: ./services/merch-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-merch-service-test
+    environment:
+      - MODE=testing
+      - DATABASE_HOST=grpc://ydb-test:2136
+      - DATABASE_NAME=/local
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-test:9092
+    networks:
+      - avito-network-test
+    depends_on:
+      ydb-test:
+        condition: service_started
+      kafka-test:
+        condition: service_started
+
+  info-service-test:
+    build:
+      context: ./services/info-service
+      dockerfile: tests.dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-info-service-test
+    environment:
+      SERVER_PORT: 8080
+      USER_SERVICE: user-service-test:50051
+      COINS_SERVICE: coins-service-test:50051
+    networks:
+      - avito-network-test
+        
+  postgres-test:
+    image: postgres:17
+    container_name: avito-postgres-test
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: on-failure:2
+    networks:
+      - avito-network-test
+    volumes:
+      - ./configs/dev/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql:ro
+   
+  redis-test:
+    image: redis:latest
+    container_name: avito-redis-test
+    environment:
+      - REDIS_USER=myuser
+      - REDIS_USER_PASSWORD=mypassword
+      - REDIS_PASSWORD=password
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure:2
+    networks:
+      - avito-network-test
+    volumes:
+      - ./configs/dev/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: >
+      bash -c '
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $$REDIS_USER on >$$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+
+  kafka-test:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: avito-kafka-test
+    restart: on-failure:2
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    networks:
+      - avito-network-test
+
+  ydb-test:
+    image: ydbplatform/local-ydb:trunk
+    container_name: avito-ydb-test
+    environment:
+      - YDB_USE_IN_MEMORY_PDISKS=true
+      - YDB_ENABLE_COLUMN_TABLES=true
+    restart: on-failure:2
+    networks:
+      - avito-network-test
+
+networks:
+  avito-network-test:
+    name: avito-network-test
+    driver: bridge

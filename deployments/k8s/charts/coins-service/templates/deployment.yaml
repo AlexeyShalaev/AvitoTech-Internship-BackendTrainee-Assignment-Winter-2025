@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coins-service
+spec:
+  replicas: {{ .Values.coinsService.replicas }}
+  selector:
+    matchLabels:
+      app: coins-service
+  template:
+    metadata:
+      labels:
+        app: coins-service
+    spec:
+      containers:
+        - name: coins-service
+          image: "{{ .Values.coinsService.image.repository }}:{{ .Values.coinsService.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.coinsService.ports[0].containerPort }}
+          env:
+            - name: DATABASE_URL
+              value: "{{ .Values.coinsService.env.DATABASE_URL }}"
+            - name: REDIS_URL
+              value: "{{ .Values.coinsService.env.REDIS_URL }}"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.coinsService.env.KAFKA_BOOTSTRAP_SERVERS }}"

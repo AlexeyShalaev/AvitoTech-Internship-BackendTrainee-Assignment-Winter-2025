@@ -1,0 +1,83 @@
+[tool.poetry]
+name = "e2e"
+version = "0.1.0"
+description = ""
+packages = [
+{include = "tests"},
+]
+authors = ["Alex Shalaev <shalaevad.alexey@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+httpx = "^0.28"
+
+[tool.poetry.dev-dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
+ruff = "^0.6.1"
+pytest = "==8.2.*"
+pytest-asyncio = "==0.23.*"
+pytest-cov = "==5.0.*"
+pytest-mock = "==3.14.*"
+pytest-deadfixtures = "*"
+pytest-repeat = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylint]
+init-hook='import sys,os;[sys.path.append(di) for di in os.listdir(os.getcwd())]'
+
+[tool.pylint.master]
+extension-pkg-allow-list = ["pydantic"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.basic]
+good-names = ["db"]
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+  "C0114",  # missing-module-docstring
+  "C0116",  # missing-function-docstring
+  "R0903",  # too-few-public-methods (for sqlalchemy tables and pydantic classes)
+  "C0115",  # missing-class-docstring (for api routes)
+]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = false
+no_implicit_optional = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[tool.black]
+line-length = 120
+target-version = ['py312']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
+
+[tool.isort]
+lines_after_imports = 2
+multi_line_output = 3
+line_length = 120
+include_trailing_comma = true

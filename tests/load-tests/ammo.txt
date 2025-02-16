@@ -1,0 +1,5 @@
+[Connection: close]
+[Host: localhost]
+[Cookie: None]
+[Authorization: Bearer <PROVIDE_YOUR_TOKEN>]
+/api/info

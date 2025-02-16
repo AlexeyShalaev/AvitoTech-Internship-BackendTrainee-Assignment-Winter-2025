@@ -1,0 +1,330 @@
+services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    container_name: avito-api-gateway
+    environment:
+      - JWT_SECRET_KEY=c3VwZXJzZWNyZXRrZXk=
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - info-service
+      - coins-service
+      - merch-service
+      - user-service
+    networks:
+      - avito-network
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:2
+    container_name: avito-auth-service
+    environment:
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/auth_service_db
+      - JWT_SECRET_KEY=c3VwZXJzZWNyZXRrZXk=
+    networks:
+      - avito-network
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/health/check
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:2
+    container_name: avito-user-service
+    environment:
+      MIGRATIONS_PATH: /app/migrations
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: user_service_db
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: user-events
+      KAFKA_MERCH_TOPIC: merch
+    networks:
+      - avito-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  coins-service:
+    build:
+      context: ./services/coins-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:2
+    container_name: avito-coins-service
+    environment:
+      - ALEMBIC_CFG=/app/alembic.ini
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/coins_service_db
+      - REDIS_URL=redis://myuser:mypassword@redis:6379/0
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    networks:
+      - avito-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  merch-service:
+    build:
+      context: ./services/merch-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:2
+    container_name: avito-merch-service
+    environment:
+      - DATABASE_HOST=grpc://ydb:2136
+      - DATABASE_NAME=/local
+    networks:
+      - avito-network
+    depends_on:
+      ydb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      coins-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  info-service:
+    build:
+      context: ./services/info-service
+      dockerfile: Dockerfile
+      additional_contexts:
+        proto: ./proto
+    restart: on-failure:2
+    container_name: avito-info-service
+    environment:
+      SERVER_PORT: 8080
+      USER_SERVICE: user-service:50051
+      COINS_SERVICE: coins-service:50051
+    networks:
+      - avito-network
+    depends_on:
+      coins-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/api/health
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  postgres:
+    image: postgres:17
+    container_name: avito-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: on-failure:2
+    networks:
+      - avito-network
+    volumes:
+      - avito-postgres-data:/var/lib/postgresql/data
+      - ./configs/dev/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql:ro
+    ports:
+      - "15432:5432"
+   
+  redis:
+    image: redis:latest
+    container_name: avito-redis
+    environment:
+      - REDIS_USER=myuser
+      - REDIS_USER_PASSWORD=mypassword
+      - REDIS_PASSWORD=password
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure:2
+    ports:
+      - "6379:6379"
+    networks:
+      - avito-network
+    volumes:
+      - avito-redis-data:/data/redis
+      - ./configs/dev/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: >
+      bash -c '
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $$REDIS_USER on >$$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: avito-zookeeper
+    restart: on-failure:2
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - avito-zookeeper-data:/var/lib/zookeeper
+    networks:
+      - avito-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: avito-kafka
+    restart: on-failure:2
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9093:9093"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - avito-kafka-data:/var/lib/kafka/data
+    networks:
+      - avito-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: avito-kafka-ui
+    restart: on-failure:2
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8082:8080"
+    depends_on:
+      - kafka
+    networks:
+      - avito-network
+
+  ydb:
+    image: ydbplatform/local-ydb:trunk
+    container_name: avito-ydb
+    environment:
+      - YDB_USE_IN_MEMORY_PDISKS=true
+      - YDB_ENABLE_COLUMN_TABLES=true
+    restart: on-failure:2
+    networks:
+      - avito-network
+    ports:
+      - "8765:8765"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: avito-clickhouse
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: on-failure:2
+    networks:
+      - avito-network
+    ports:
+      - "8123:8123"  # HTTP-интерфейс
+      - "9000:9000"  # TCP-интерфейс
+    volumes:
+      - ./configs/dev/clickhouse-init.sql:/docker-entrypoint-initdb.d/clickhouse-init.sql
+    environment:
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=secret  # Установите пароль для пользователя default
+      - CLICKHOUSE_DB=database   # Автосоздание БД
+
+  clickhouse-ui:
+    image: ghcr.io/caioricciuti/ch-ui:latest
+    container_name: avito-clickhouse-ui
+    restart: on-failure:2
+    networks:
+      - avito-network
+    ports:
+      - "5521:5521"
+    environment:
+      VITE_CLICKHOUSE_URL: "http://localhost:8123"
+      VITE_CLICKHOUSE_USER: "default"
+      VITE_CLICKHOUSE_PASS: "secret"
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+networks:
+  avito-network:
+    name: avito-network
+    driver: bridge
+
+volumes:
+  avito-postgres-data:
+    name: avito-postgres-data
+  avito-redis-data:
+    name: avito-redis-data
+  avito-zookeeper-data:
+    name: avito-zookeeper-data
+  avito-kafka-data:
+    name: avito-kafka-data

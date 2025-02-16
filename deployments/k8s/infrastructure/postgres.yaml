@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avito-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avito-postgres
+  template:
+    metadata:
+      labels:
+        app: avito-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: avito-postgres-pvc
+        - name: init-scripts
+          configMap:
+            name: avito-postgres-init-scripts
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avito-postgres
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: avito-postgres

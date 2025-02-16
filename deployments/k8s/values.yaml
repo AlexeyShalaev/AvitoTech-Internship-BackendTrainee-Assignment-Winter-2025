@@ -1,0 +1,66 @@
+apiGateway:
+  image:
+    repository: avito/api-gateway
+    tag: latest
+  env:
+    JWT_SECRET_KEY: c3VwZXJzZWNyZXRrZXk=
+  ports:
+    - "8080:8080"
+
+authService:
+  image:
+    repository: avito/auth-service
+    tag: latest
+  env:
+    JWT_SECRET_KEY: c3VwZXJzZWNyZXRrZXk=
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/auth_service_db
+  ports:
+    - "8081:8080"
+
+userService:
+  image:
+    repository: avito/user-service
+    tag: latest
+  env:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    KAFKA_BROKERS: kafka:9092
+    KAFKA_TOPIC: user-events
+  ports:
+    - "8082:8080"
+
+coinsService:
+  image:
+    repository: avito/coins-service
+    tag: latest
+  env:
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/coins_service_db
+    REDIS_URL: redis://myuser:mypassword@redis:6379/0
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  ports:
+    - "8083:8080"
+
+postgres:
+  image: postgres:17
+  env:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: postgres
+  ports:
+    - "5432:5432"
+
+redis:
+  image: redis:latest
+  env:
+    REDIS_USER: myuser
+    REDIS_PASSWORD: password
+  ports:
+    - "6379:6379"
+
+kafka:
+  image: confluentinc/cp-kafka:7.4.0
+  env:
+    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+  ports:
+    - "9092:9092"

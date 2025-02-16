@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: merch-service
+spec:
+  replicas: {{ .Values.merchService.replicas }}
+  selector:
+    matchLabels:
+      app: merch-service
+  template:
+    metadata:
+      labels:
+        app: merch-service
+    spec:
+      containers:
+        - name: merch-service
+          image: "{{ .Values.merchService.image.repository }}:{{ .Values.merchService.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.merchService.ports[0].containerPort }}
+          env:
+            - name: DATABASE_HOST
+              value: "{{ .Values.merchService.env.DATABASE_HOST }}"
+            - name: DATABASE_NAME
+              value: "{{ .Values.merchService.env.DATABASE_NAME }}"
