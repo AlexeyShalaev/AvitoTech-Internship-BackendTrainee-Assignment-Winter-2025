@@ -3,7 +3,7 @@
 ## Запуск Яндекс Танка
 
 ```docker
-docker run -v ./:/var/loadtest --net host -it yandex/yandex-tank
+docker run -v .:/var/loadtest --net host -it yandex/yandex-tank
 ```
 
 ```bash
