@@ -14,8 +14,7 @@ class ApiGatewayClient:
         data = {"to_user": to_user, "amount": amount}
         
         response = await self.client.post(url, json=data, headers=headers)
-        response.raise_for_status()  # Raise exception for failed requests
-        return response.json()
+        return response.status_code, response.json()
 
     async def get_user_info(self):
         """Get current user's info."""
@@ -23,8 +22,7 @@ class ApiGatewayClient:
         headers = {"Authorization": f"Bearer {self.token}"}
         
         response = await self.client.get(url, headers=headers)
-        response.raise_for_status()  # Raise exception for failed requests
-        return response.json()
+        return response.status_code, response.json()
 
     async def buy_merch(self, name: str):
         """Buy merch for a specific item."""
@@ -32,5 +30,4 @@ class ApiGatewayClient:
         headers = {"Authorization": f"Bearer {self.token}"}
         
         response = await self.client.post(url, headers=headers)
-        response.raise_for_status()  # Raise exception for failed requests
-        return response.json()
+        return response.status_code, response.json()

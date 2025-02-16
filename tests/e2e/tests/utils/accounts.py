@@ -1,3 +1,4 @@
+import time
 from tests.clients import AuthClient, ApiGatewayClient
 
 
@@ -24,18 +25,23 @@ class Account:
     
     
 class AccountManager:
-    def __init__(self, api_gateway_url: str, auth_service_url: str):
+    def __init__(self, api_gateway_url: str, auth_service_url: str, prefix: str | None = None):
         self.api_gateway_url = api_gateway_url
         self.auth_service_url = auth_service_url
         self.accounts = {}  # Словарь для хранения аккаунтов
+        
+        if prefix is None:
+            self.prefix = str(int(time.time()))
+        else:
+            self.prefix = prefix
 
     async def add_account(self, username: str, password: str):
         """Добавление нового аккаунта."""
-        account = Account(username, password, self.auth_service_url, self.api_gateway_url)
+        account = Account(f"{username}_{self.prefix}", password, self.auth_service_url, self.api_gateway_url)
         await account.authenticate()  # Получаем токен для аккаунта
         self.accounts[username] = account
     
-    def get_account(self, username: str):
+    def get_account(self, username: str) -> Account:
         """Получить аккаунт по имени."""
         if username not in self.accounts:
             raise ValueError(f"Account {username} not found.")

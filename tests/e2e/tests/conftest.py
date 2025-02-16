@@ -1,9 +1,10 @@
 import os
-import pytest
+import time
+import pytest_asyncio
 from tests.utils.accounts import AccountManager  # Импортируем класс AccountManager
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def account_manager():
     """Создание AccountManager один раз на все тесты."""
     
@@ -17,5 +18,9 @@ async def account_manager():
     # Добавление аккаунтов
     await manager.add_account("one", "password1")
     await manager.add_account("two", "password12")
+    
+    await manager.add_account("buyer", "password1")
+    
+    time.sleep(5)
     
     return manager

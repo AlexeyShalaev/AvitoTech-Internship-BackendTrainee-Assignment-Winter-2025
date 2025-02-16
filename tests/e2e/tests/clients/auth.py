@@ -12,4 +12,4 @@ class AuthClient:
             json={"username": username, "password": password}
         )
         response.raise_for_status()
-        return response.json()["access_token"]
+        return response.json()["token"]
